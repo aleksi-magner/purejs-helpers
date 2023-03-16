@@ -27,6 +27,7 @@ gulpfile.esm.js
 .editorconfig
 .gitignore
 .prettierrc.js
+babel.config.js
+helpers.spec.js
+jest.config.js
 helpers.js
-style.css
-!/dist/style.css

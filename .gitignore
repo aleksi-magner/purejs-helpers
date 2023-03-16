@@ -20,7 +20,3 @@ node_modules
 *.njsproj
 *.sln
 *.sw?
-
-babel.config.js
-helpers.spec.js
-jest.config.js
