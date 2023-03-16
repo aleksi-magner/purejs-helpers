@@ -1,0 +1,33 @@
+{
+  "name": "purejs-helpers",
+  "author": "Aleksey Magner",
+  "version": "1.1.0",
+  "description": "JavaScript helpers.",
+  "license": "MIT",
+  "main": "dist/helpers.min.js",
+  "scripts": {
+    "deploy": "git push && git push --tags && npm publish",
+    "patch": "gulp && git add . && npm version patch --force -m 'Upgrade to %s' && npm run deploy",
+    "minor": "gulp && git add . && npm version minor --force -m 'Upgrade to %s' && npm run deploy",
+    "major": "gulp && git add . && npm version major --force -m 'Upgrade to %s' && npm run deploy",
+    "unit": "jest",
+    "unit:dev": "jest --onlyChanged --watch"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.21.3",
+    "@babel/preset-env": "^7.20.2",
+    "@jest/globals": "^29.5.0",
+    "babel-jest": "^29.5.0",
+    "esm": "^3.2.25",
+    "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
+    "gulp-plumber": "^1.2.1",
+    "gulp-rename": "^2.0.0",
+    "gulp-sourcemaps": "^3.0.0",
+    "gulp-terser": "^2.1.0",
+    "jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.5.0",
+    "jsdom": "^21.1.1",
+    "prettier": "^2.8.4"
+  }
+}
