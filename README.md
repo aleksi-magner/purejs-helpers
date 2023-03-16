@@ -40,20 +40,24 @@ import { isKZ } from 'purejs-helpers';
 isKZ(); // true
 ```
 
-### Получение значения из Cookie по ключу
+### Работа с Cookie
 
 ```javascript
-import { getCookieValue } from 'purejs-helpers';
+import { cookie } from 'purejs-helpers';
 
-getCookieValue('any_key'); // 'value'
-```
+cookie.get('any_key'); // 'value'
 
-### Замена значения в Cookie по ключу
+cookie.set('name', 'value', {
+  'Domain': 'domain.com', // <string>
+  'Path': '/page', // <string>. Default: '/'
+  'Expires': new Date(3000, 11, 31), // <Date|string>
+  'Max-Age': 3600, // <number>
+  'HttpOnly': true, // <boolean>
+  'Secure': true, // <boolean>
+  'SameSite': 'Strict', // <string>. Strict | Lax | None
+});
 
-```javascript
-import { replaceCookieValue } from 'purejs-helpers';
-
-replaceCookieValue('any_key', 'new value');
+cookie.delete('any_key');
 ```
 
 ### Определение типа переданного значения
@@ -61,12 +65,16 @@ replaceCookieValue('any_key', 'new value');
 ```javascript
 import { getType } from 'purejs-helpers';
 
+getType(); // 'Undefined'
 getType([]); // 'Array'
 getType({}); // 'Object'
 getType(new Date()) // 'Date'
 getType(() => {}); // 'Function'
 getType(function() {}); // 'Function'
-getType(42); // 'Number'
+getType(Promise.resolve()); // 'Promise'
+getType(new Proxy({}, {})); // 'Object'
+getType(new Event('any')); // 'Event'
+getType(42.13); // 'Number'
 getType('string'); // 'String'
 getType(''); // 'String'
 getType(null); // 'Null'
@@ -137,7 +145,7 @@ dateTime(new Date(2020, 9, 21, 8, 45)); // '21.10.2020, 08:45'
 ### Преобразование даты в формат WW, DD MMMM YYYY
 
 ```javascript
-import { locale } from 'purejs-helpers';
+import { dateToDateLong } from 'purejs-helpers';
 
 const date = new Date(2020, 9, 21);
 
