@@ -14,7 +14,13 @@ const js = () =>
         presets: ['@babel/env'],
       }),
     )
-    .pipe(terser())
+    .pipe(
+      terser({
+        format: {
+          comments: 'all',
+        },
+      }),
+    )
     .pipe(write())
     .pipe(rename({ suffix: '.min' }))
     .pipe(dest('dist'));
