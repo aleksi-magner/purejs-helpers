@@ -1,4 +1,11 @@
-export const locale = 'ru-RU';
+/**
+ * Локализация по умолчанию
+ */
+const locale = 'ru-RU';
+/**
+ * Локализация по умолчанию
+ */
+exports.locale = locale;
 
 /**
  * Определение окружения по домену
@@ -6,7 +13,7 @@ export const locale = 'ru-RU';
  * @param {string} [name='verme'] - ключевое имя
  * @return {{server: string, mode: string}}
  */
-export const getEnvironment = (name = 'verme') => {
+exports.getEnvironment = (name = 'verme') => {
   const URL = window.location.hostname;
 
   const isLocalServer = ['127.0.0.1', 'localhost'].includes(URL);
@@ -24,9 +31,15 @@ export const getEnvironment = (name = 'verme') => {
  * https://any-domain.kz -> true
  * @return {boolean}
  */
-export const isKZ = () => window.location.hostname.includes('.kz');
+const isKZ = () => window.location.hostname.includes('.kz');
+/**
+ * Определение казахского домена
+ * https://any-domain.kz -> true
+ * @return {boolean}
+ */
+exports.isKZ = isKZ;
 
-export const cookie = {
+exports.cookie = {
   /**
    * Формирование опций cookie
    * @param {Object} [options={}]
@@ -177,7 +190,7 @@ export const cookie = {
  * @param {*} [value]
  * @return {string} - Undefined | Null | Number | String | Date | Function | Array | Object
  */
-export const getType = value => {
+const getType = value => {
   switch (value) {
     case undefined:
       return 'Undefined';
@@ -187,6 +200,12 @@ export const getType = value => {
       return value.constructor.name;
   }
 };
+/**
+ * Определение типа переданного значения
+ * @param {*} [value]
+ * @return {string} - Undefined | Null | Number | String | Date | Function | Array | Object
+ */
+exports.getType = getType;
 
 /**
  * Добавление ведущего нуля
@@ -194,13 +213,20 @@ export const getType = value => {
  * @param {string|number} value
  * @return {string}
  */
-export const leadingZero = value => {
+const leadingZero = value => {
   const type = getType(value);
   const invalid = !value || !['Number', 'String'].some(allowed => allowed === type);
   const number = invalid ? 0 : value;
 
   return String(number).padStart(2, '0');
 };
+/**
+ * Добавление ведущего нуля
+ * 9 -> '09'
+ * @param {string|number} value
+ * @return {string}
+ */
+exports.leadingZero = leadingZero;
 
 /**
  * Преобразование числа в сумму
@@ -209,7 +235,7 @@ export const leadingZero = value => {
  * @param {number} [fraction=1]
  * @return {string}
  */
-export const currencyMask = (value, fraction = 1) => {
+exports.currencyMask = (value, fraction = 1) => {
   const KZ = isKZ();
   const currencyLocale = KZ ? 'ru-KZ' : 'ru-RU';
   const currency = KZ ? 'KZT' : 'RUB';
@@ -227,8 +253,14 @@ export const currencyMask = (value, fraction = 1) => {
  * @param {Date} [date]
  * @return {boolean}
  */
-export const dateIsValid = date =>
+const dateIsValid = date =>
   [!!date, date instanceof Date, !Number.isNaN(new Date(date).getTime())].every(Boolean);
+/**
+ * Проверка объекта даты на валидность
+ * @param {Date} [date]
+ * @return {boolean}
+ */
+exports.dateIsValid = dateIsValid;
 
 /**
  * Преобразование даты в ISO формат
@@ -236,7 +268,7 @@ export const dateIsValid = date =>
  * @param {Date} date
  * @return {string}
  */
-export const toISODate = date => {
+exports.toISODate = date => {
   if (!dateIsValid(date)) {
     return '';
   }
@@ -257,7 +289,7 @@ export const toISODate = date => {
  * @param {string} [timeZone='Europe/Moscow']
  * @return {string}
  */
-export const dateToDateShort = (date, timeZone = 'Europe/Moscow') => {
+exports.dateToDateShort = (date, timeZone = 'Europe/Moscow') => {
   if (!dateIsValid(date)) {
     return '';
   }
@@ -282,7 +314,7 @@ export const dateToDateShort = (date, timeZone = 'Europe/Moscow') => {
  * @param {string} [timeZone='Europe/Moscow']
  * @return {string}
  */
-export const ISOToDateFormat = (ISODate, timeZone = 'Europe/Moscow') => {
+exports.ISOToDateFormat = (ISODate, timeZone = 'Europe/Moscow') => {
   const datePattern = /^(\d{4})-(\d{1,2})-(\d{1,2})$/; // 'YYYY-MM-DD'
 
   const invalid = [!ISODate, getType(ISODate) !== 'String', !datePattern.test(ISODate)].some(
@@ -313,7 +345,7 @@ export const ISOToDateFormat = (ISODate, timeZone = 'Europe/Moscow') => {
  * @param {string} [timeZone='Europe/Moscow']
  * @return {string}
  */
-export const dateTime = (date, timeZone = 'Europe/Moscow') => {
+exports.dateTime = (date, timeZone = 'Europe/Moscow') => {
   if (!dateIsValid(date)) {
     return '';
   }
@@ -344,7 +376,7 @@ export const dateTime = (date, timeZone = 'Europe/Moscow') => {
  * @param {string} [payload.timeZone='Europe/Moscow']
  * @return {string}
  */
-export const dateToDateLong = (payload = {}) => {
+exports.dateToDateLong = (payload = {}) => {
   if (!dateIsValid(payload.date)) {
     return '';
   }
@@ -383,7 +415,7 @@ export const dateToDateLong = (payload = {}) => {
  * @param {string} [timeZone='Europe/Moscow']
  * @return {string}
  */
-export const dateToHoursMinutes = (date, timeZone = 'Europe/Moscow') => {
+exports.dateToHoursMinutes = (date, timeZone = 'Europe/Moscow') => {
   if (!dateIsValid(date)) {
     return '00:00';
   }
@@ -407,7 +439,7 @@ export const dateToHoursMinutes = (date, timeZone = 'Europe/Moscow') => {
  * @param {number} value
  * @return {string}
  */
-export const minutesToHoursMinutes = value => {
+exports.minutesToHoursMinutes = value => {
   const type = getType(value);
   const invalid = !value || type !== 'Number';
   const number = invalid ? 0 : value;
@@ -429,7 +461,7 @@ export const minutesToHoursMinutes = value => {
  * @param {string} dateString
  * @return {{hour: string, minute: string, timestamp: number}}
  */
-export const getMoscowTime = dateString => {
+exports.getMoscowTime = dateString => {
   const date = new Date(dateString);
 
   if (!dateString || !dateIsValid(date)) {
@@ -461,7 +493,7 @@ export const getMoscowTime = dateString => {
  * @param {Date} [currentDate=Date]
  * @return {number}
  */
-export const weekOfYear = (currentDate = new Date()) => {
+const weekOfYear = (currentDate = new Date()) => {
   if (!dateIsValid(currentDate)) {
     return 0;
   }
@@ -478,6 +510,13 @@ export const weekOfYear = (currentDate = new Date()) => {
 
   return 1 + Math.round((currentYearDay - 3 + ((firstWeek.getDay() + 6) % 7)) / 7);
 };
+/**
+ * Получение номера недели в году
+ * Wed Oct 21 2020 08:45:00 GMT+0300 -> 43
+ * @param {Date} [currentDate=Date]
+ * @return {number}
+ */
+exports.weekOfYear = weekOfYear;
 
 /**
  * Получения даты начала недели по номеру недели
@@ -486,7 +525,7 @@ export const weekOfYear = (currentDate = new Date()) => {
  * @param {number} weekNumber
  * @return {Date}
  */
-export const weekNumberToDate = (year, weekNumber) => {
+exports.weekNumberToDate = (year, weekNumber) => {
   const validYear = !year || getType(year) !== 'Number' ? new Date().getFullYear() : year;
   const validWeek = !weekNumber || getType(weekNumber) !== 'Number' ? weekOfYear() : weekNumber;
 
@@ -503,12 +542,12 @@ export const weekNumberToDate = (year, weekNumber) => {
 
 /**
  * Окончания слов
- * wordEndings(17, ['метр', 'метра', 'метров']) -> '17 метров'
+ * 17, ['метр', 'метра', 'метров'] -> '17 метров'
  * @param {number|string} amount
  * @param {Array} titles
  * @return {string}
  */
-export const wordEndings = (amount, titles) => {
+const wordEndings = (amount, titles) => {
   const amountType = getType(amount);
   const validAmount = ['Number', 'String'].some(allowed => allowed === amountType);
 
@@ -535,6 +574,14 @@ export const wordEndings = (amount, titles) => {
 
   return [formatNumber, word].join(' ');
 };
+/**
+ * Окончания слов
+ * 17, ['метр', 'метра', 'метров'] -> '17 метров'
+ * @param {number|string} amount
+ * @param {Array} titles
+ * @return {string}
+ */
+exports.wordEndings = wordEndings;
 
 /**
  * Преобразование числа в расстояние
@@ -543,7 +590,7 @@ export const wordEndings = (amount, titles) => {
  * @param {boolean} [short=false]
  * @return {string}
  */
-export const distanceFormat = (distance, short = false) => {
+exports.distanceFormat = (distance, short = false) => {
   const type = getType(distance);
   const validType = ['Number', 'String'].some(allowed => allowed === type);
 
@@ -568,7 +615,7 @@ export const distanceFormat = (distance, short = false) => {
  * @param {number} bytes
  * @return {string}
  */
-export const bytesToSize = bytes => {
+exports.bytesToSize = bytes => {
   const invalid = [!bytes, getType(bytes) !== 'Number'].some(Boolean);
 
   if (invalid) {
@@ -593,7 +640,7 @@ export const bytesToSize = bytes => {
  * @param {File} file
  * @return {Promise<string>}
  */
-export const convertFileToBase64 = file => {
+exports.convertFileToBase64 = file => {
   if (!file) {
     return Promise.resolve('');
   }
@@ -616,7 +663,7 @@ export const convertFileToBase64 = file => {
  * @param {string} fullName
  * @return {string}
  */
-export const shortName = fullName => {
+exports.shortName = fullName => {
   const invalid = [!fullName, getType(fullName) !== 'String'].some(Boolean);
 
   if (invalid) {
@@ -650,7 +697,7 @@ export const shortName = fullName => {
  * @param {Object} sourceObject
  * @return {Object}
  */
-export const removeObjectKeys = (exclusionFields, sourceObject) => {
+exports.removeObjectKeys = (exclusionFields, sourceObject) => {
   const object = { ...(sourceObject || {}) };
 
   (exclusionFields || []).forEach(key => {
@@ -665,7 +712,7 @@ export const removeObjectKeys = (exclusionFields, sourceObject) => {
  * @param {Object} sourceObject
  * @return {Object}
  */
-export const deepClone = sourceObject => {
+const deepClone = sourceObject => {
   if (!sourceObject || typeof sourceObject !== 'object') {
     return sourceObject;
   } else if (sourceObject instanceof Date) {
@@ -684,6 +731,12 @@ export const deepClone = sourceObject => {
 
   return clone;
 };
+/**
+ * Рекурсивное (глубокое) копирование объекта (массива)
+ * @param {Object} sourceObject
+ * @return {Object}
+ */
+exports.deepClone = deepClone;
 
 /**
  * Мемоизация
@@ -695,7 +748,7 @@ export const deepClone = sourceObject => {
  * @param {Function} callback
  * @return {Function}
  */
-export const memo = callback =>
+exports.memo = callback =>
   new Proxy(callback, {
     cache: new Map(),
     apply(fn, context, args) {
@@ -719,7 +772,7 @@ export const memo = callback =>
  * @param {string[]} [payload.keys=[]] - список ключей объекта
  * @return {object[]} - Возвращает отфильтрованный список объект по поисковым словам
  */
-export const searchByKeys = (payload = {}) => {
+exports.searchByKeys = (payload = {}) => {
   const search = payload.search || '';
   const options = payload.options || [];
   const searchableKeys = payload.keys || [];
@@ -753,7 +806,7 @@ export const searchByKeys = (payload = {}) => {
  * Проверка поддержки браузером копирования/вставки
  * @return {{copy: boolean, paste: boolean}}
  */
-export const checkClipboardFunctionality = async () => {
+exports.checkClipboardFunctionality = async () => {
   const actions = {
     copy: false,
     paste: false,
@@ -800,7 +853,7 @@ export const checkClipboardFunctionality = async () => {
  * @param {string} prefix='utm_'
  * @return {Object|null}
  */
-export const getUTMLabels = async (prefix = 'utm_') => {
+exports.getUTMLabels = async (prefix = 'utm_') => {
   const queryString = window.location.search;
 
   const data = {};

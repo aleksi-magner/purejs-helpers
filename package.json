@@ -1,7 +1,7 @@
 {
   "name": "purejs-helpers",
   "author": "Aleksey Magner",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "JavaScript helpers.",
   "license": "MIT",
   "main": "dist/helpers.min.js",
@@ -24,7 +24,6 @@
     "gulp-plumber": "^1.2.1",
     "gulp-rename": "^2.0.0",
     "gulp-sourcemaps": "^3.0.0",
-    "gulp-terser": "^2.1.0",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
     "jsdom": "^21.1.1",

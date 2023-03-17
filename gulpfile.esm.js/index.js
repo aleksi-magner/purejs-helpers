@@ -2,7 +2,6 @@ import { src, dest } from 'gulp';
 import plumber from 'gulp-plumber';
 import { init, write } from 'gulp-sourcemaps';
 import babel from 'gulp-babel';
-import terser from 'gulp-terser';
 import rename from 'gulp-rename';
 
 const js = () =>
@@ -12,13 +11,7 @@ const js = () =>
     .pipe(
       babel({
         presets: ['@babel/env'],
-      }),
-    )
-    .pipe(
-      terser({
-        format: {
-          comments: 'all',
-        },
+        minified: true,
       }),
     )
     .pipe(write())
