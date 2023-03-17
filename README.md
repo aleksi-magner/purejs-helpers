@@ -321,7 +321,7 @@ getUTMLabels(); // { any: 'value' }
 
 ### Good Boy License
 
-We’ve released the icon pack either under MIT or the Good Boy License. We invented it. Please do _whatever your mom would approve of:_
+We’ve released the helpers functions either under MIT or the Good Boy License. We invented it. Please do _whatever your mom would approve of:_
 
 * Download
 * Change
