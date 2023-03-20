@@ -3,6 +3,7 @@
  */
 const locale = 'ru-RU';
 /**
+ * @const locale
  * Локализация по умолчанию
  */
 exports.locale = locale;
@@ -10,6 +11,7 @@ exports.locale = locale;
 /**
  * Определение окружения по домену
  * https://any-verme.ru -> { server: 'any', mode: 'development' }
+ * @function getEnvironment
  * @param {string} [name='verme'] - ключевое имя
  * @return {{server: string, mode: string}}
  */
@@ -29,16 +31,21 @@ exports.getEnvironment = (name = 'verme') => {
 /**
  * Определение казахского домена
  * https://any-domain.kz -> true
+ * @function isKZ
  * @return {boolean}
  */
 const isKZ = () => window.location.hostname.includes('.kz');
 /**
  * Определение казахского домена
  * https://any-domain.kz -> true
+ * @function isKZ
  * @return {boolean}
  */
 exports.isKZ = isKZ;
 
+/**
+ * Работа с Cookie
+ */
 exports.cookie = {
   /**
    * Формирование опций cookie
@@ -187,6 +194,7 @@ exports.cookie = {
 
 /**
  * Определение типа переданного значения
+ * @function getType
  * @param {*} [value]
  * @return {string} - Undefined | Null | Number | String | Date | Function | Array | Object
  */
@@ -202,6 +210,7 @@ const getType = value => {
 };
 /**
  * Определение типа переданного значения
+ * @function getType
  * @param {*} [value]
  * @return {string} - Undefined | Null | Number | String | Date | Function | Array | Object
  */
@@ -210,6 +219,7 @@ exports.getType = getType;
 /**
  * Добавление ведущего нуля
  * 9 -> '09'
+ * @function leadingZero
  * @param {string|number} value
  * @return {string}
  */
@@ -223,6 +233,7 @@ const leadingZero = value => {
 /**
  * Добавление ведущего нуля
  * 9 -> '09'
+ * @function leadingZero
  * @param {string|number} value
  * @return {string}
  */
@@ -231,6 +242,7 @@ exports.leadingZero = leadingZero;
 /**
  * Преобразование числа в сумму
  * 1840 -> '1 840 ₽'
+ * @function currencyMask
  * @param {number|string} value
  * @param {number} [fraction=1]
  * @return {string}
@@ -250,6 +262,7 @@ exports.currencyMask = (value, fraction = 1) => {
 
 /**
  * Проверка объекта даты на валидность
+ * @function dateIsValid
  * @param {Date} [date]
  * @return {boolean}
  */
@@ -257,6 +270,7 @@ const dateIsValid = date =>
   [!!date, date instanceof Date, !Number.isNaN(new Date(date).getTime())].every(Boolean);
 /**
  * Проверка объекта даты на валидность
+ * @function dateIsValid
  * @param {Date} [date]
  * @return {boolean}
  */
@@ -265,6 +279,7 @@ exports.dateIsValid = dateIsValid;
 /**
  * Преобразование даты в ISO формат
  * Wed Oct 21 2020 08:45:00 GMT+0300 -> '2020-10-21'
+ * @function toISODate
  * @param {Date} date
  * @return {string}
  */
@@ -285,6 +300,7 @@ exports.toISODate = date => {
 /**
  * Преобразование даты в формат DD.MM.YYYY
  * Wed Oct 21 2020 08:45:00 GMT+0300 -> '21.10.2020'
+ * @function dateToDateShort
  * @param {Date} date
  * @param {string} [timeZone='Europe/Moscow']
  * @return {string}
@@ -310,6 +326,7 @@ exports.dateToDateShort = (date, timeZone = 'Europe/Moscow') => {
 /**
  * Преобразование ISO даты в формат DD.MM.YYYY
  * '1979-12-03' -> '03.12.1979'
+ * @function ISOToDateFormat
  * @param {string} ISODate
  * @param {string} [timeZone='Europe/Moscow']
  * @return {string}
@@ -341,6 +358,7 @@ exports.ISOToDateFormat = (ISODate, timeZone = 'Europe/Moscow') => {
 /**
  * Преобразование даты в формат DD.MM.YYYY, HH:MM
  * Wed Oct 21 2020 08:45:00 GMT+0300 -> '21.10.2020, 08:45'
+ * @function dateTime
  * @param {Date} date
  * @param {string} [timeZone='Europe/Moscow']
  * @return {string}
@@ -369,6 +387,7 @@ exports.dateTime = (date, timeZone = 'Europe/Moscow') => {
 /**
  * Преобразование даты в формат WW, DD MMMM YYYY
  * Wed Oct 21 2020 08:45:00 GMT+0300 -> '21 октября' | '21 октября 2020' | 'ср, 21 октября' | 'ср, 21 октября 2020'
+ * @function dateToDateLong
  * @param {Object} payload={}
  * @param {Date} payload.date
  * @param {boolean} [payload.showWeekDay=false]
@@ -411,6 +430,7 @@ exports.dateToDateLong = (payload = {}) => {
 /**
  * Преобразование даты в формат HH:MM
  * Wed Oct 21 2020 08:45:00 GMT+0300 -> '08:45'
+ * @function dateToHoursMinutes
  * @param {Date} date
  * @param {string} [timeZone='Europe/Moscow']
  * @return {string}
@@ -436,6 +456,7 @@ exports.dateToHoursMinutes = (date, timeZone = 'Europe/Moscow') => {
 /**
  * Преобразование числа в формат времени HH:MM
  * 480 -> '08:00'
+ * @function minutesToHoursMinutes
  * @param {number} value
  * @return {string}
  */
@@ -458,6 +479,7 @@ exports.minutesToHoursMinutes = value => {
 /**
  * Получение объекта с московским временем из даты
  * "2022-05-02T08:00:00Z" -> { hour: '12', minute: '00', timestamp: 1643041320000 }
+ * @function getMoscowTime
  * @param {string} dateString
  * @return {{hour: string, minute: string, timestamp: number}}
  */
@@ -490,6 +512,7 @@ exports.getMoscowTime = dateString => {
 /**
  * Получение номера недели в году
  * Wed Oct 21 2020 08:45:00 GMT+0300 -> 43
+ * @function weekOfYear
  * @param {Date} [currentDate=Date]
  * @return {number}
  */
@@ -513,6 +536,7 @@ const weekOfYear = (currentDate = new Date()) => {
 /**
  * Получение номера недели в году
  * Wed Oct 21 2020 08:45:00 GMT+0300 -> 43
+ * @function weekOfYear
  * @param {Date} [currentDate=Date]
  * @return {number}
  */
@@ -521,6 +545,7 @@ exports.weekOfYear = weekOfYear;
 /**
  * Получения даты начала недели по номеру недели
  * 2020, 43 -> Wed Oct 21 2020 00:00:00 GMT+0300
+ * @function weekNumberToDate
  * @param {number} year
  * @param {number} weekNumber
  * @return {Date}
@@ -543,6 +568,7 @@ exports.weekNumberToDate = (year, weekNumber) => {
 /**
  * Окончания слов
  * 17, ['метр', 'метра', 'метров'] -> '17 метров'
+ * @function wordEndings
  * @param {number|string} amount
  * @param {Array} titles
  * @return {string}
@@ -577,6 +603,7 @@ const wordEndings = (amount, titles) => {
 /**
  * Окончания слов
  * 17, ['метр', 'метра', 'метров'] -> '17 метров'
+ * @function wordEndings
  * @param {number|string} amount
  * @param {Array} titles
  * @return {string}
@@ -586,6 +613,7 @@ exports.wordEndings = wordEndings;
 /**
  * Преобразование числа в расстояние
  * 42 -> '42 метра' | 42 -> '42 м' | 1042 -> '1.42 км'
+ * @function distanceFormat
  * @param {number|string} distance
  * @param {boolean} [short=false]
  * @return {string}
@@ -612,6 +640,7 @@ exports.distanceFormat = (distance, short = false) => {
 /**
  * Получение преобразованного размера файла
  * 40031 -> '39.09 кБ'
+ * @function bytesToSize
  * @param {number} bytes
  * @return {string}
  */
@@ -637,6 +666,7 @@ exports.bytesToSize = bytes => {
 
 /**
  * Преобразование файла в Base64
+ * @function convertFileToBase64
  * @param {File} file
  * @return {Promise<string>}
  */
@@ -660,6 +690,7 @@ exports.convertFileToBase64 = file => {
  * Сокращение ФИО до формата ФффИО или ФфффИ (если нет отчества)
  * 'Светлова Александра Андреевна' -> 'СвеАА'
  * 'Бекр Фуркад' -> 'БекрФ'
+ * @function shortName
  * @param {string} fullName
  * @return {string}
  */
@@ -693,6 +724,7 @@ exports.shortName = fullName => {
 /**
  * Удаление ключей из объекта
  * ['a'], { a: 13, b: 42 } -> { b: 42 }
+ * @function removeObjectKeys
  * @param {Array} exclusionFields
  * @param {Object} sourceObject
  * @return {Object}
@@ -709,6 +741,7 @@ exports.removeObjectKeys = (exclusionFields, sourceObject) => {
 
 /**
  * Рекурсивное (глубокое) копирование объекта (массива)
+ * @function deepClone
  * @param {Object} sourceObject
  * @return {Object}
  */
@@ -733,6 +766,7 @@ const deepClone = sourceObject => {
 };
 /**
  * Рекурсивное (глубокое) копирование объекта (массива)
+ * @function deepClone
  * @param {Object} sourceObject
  * @return {Object}
  */
@@ -740,11 +774,13 @@ exports.deepClone = deepClone;
 
 /**
  * Мемоизация
+ * @example
  * const add = (x, y) => x + y;
  * const memoAdd = memo(add);
  *
  * memoAdd(24, 42); // Calculated
  * memoAdd(42, 24); // From cache
+ * @function memo
  * @param {Function} callback
  * @return {Function}
  */
@@ -766,6 +802,7 @@ exports.memo = callback =>
 
 /**
  * Поиск по поисковой фразе в списке по переданным ключам объекта
+ * @function searchByKeys
  * @param {Object} payload={}
  * @param {string} [payload.search=''] - поисковая фраза
  * @param {Object[]} [payload.options=[]] - список объектов
@@ -804,6 +841,7 @@ exports.searchByKeys = (payload = {}) => {
 
 /**
  * Проверка поддержки браузером копирования/вставки
+ * @function checkClipboardFunctionality
  * @return {{copy: boolean, paste: boolean}}
  */
 exports.checkClipboardFunctionality = async () => {
@@ -850,6 +888,7 @@ exports.checkClipboardFunctionality = async () => {
 
 /**
  * Получение UTM-меток из поисковой строки
+ * @function getUTMLabels
  * @param {string} prefix='utm_'
  * @return {Object|null}
  */
