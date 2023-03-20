@@ -49,6 +49,7 @@ exports.isKZ = isKZ;
 exports.cookie = {
   /**
    * Формирование опций cookie
+   * @method
    * @param {Object} [options={}]
    * @return {string}
    */
@@ -129,6 +130,7 @@ exports.cookie = {
   },
   /**
    * Получение значения из Cookie по ключу
+   * @method
    * @param {string} name
    * @return {string}
    */
@@ -152,6 +154,7 @@ exports.cookie = {
   },
   /**
    * Установка значения в Cookie по ключу
+   * @method
    * @param {string} name
    * @param {string} value
    * @param {{
@@ -181,6 +184,7 @@ exports.cookie = {
   },
   /**
    * Удаление Cookie по ключу
+   * @method
    * @param {string} name
    */
   delete(name) {
