@@ -471,10 +471,29 @@ exports.dateTime = dateTime;
  * @param {string} [payload.timeZone='Europe/Moscow'] - Часовой пояс
  * @return {string}
  * @example
- * dateToDateLong(new Date('2020-10-21')); // '21 октября 2020'
- * dateToDateLong(new Date('2020-10-21'), false, true); // '21 октября'
- * dateToDateLong(new Date('2020-10-21'), true, false); // 'ср, 21 октября'
- * dateToDateLong(new Date('2020-10-21'), true, true); // 'ср, 21 октября 2020'
+ * // '21 октября 2020'
+ * dateToDateLong({
+ *   date: new Date(2020, 9, 21),
+ * });
+ *
+ * // 'ср, 21 октября 2020'
+ * dateToDateLong({
+ *   date: new Date(2020, 9, 21),
+ *   showWeekDay: true,
+ * });
+ *
+ * // 'ср, 21 октября'
+ * dateToDateLong({
+ *   date: new Date(2020, 9, 21),
+ *   showWeekDay: true,
+ *   showYear: false,
+ * });
+ *
+ * // '21 октября'
+ * dateToDateLong({
+ *   date: new Date(2020, 9, 21),
+ *   showYear: false,
+ * });
  */
 const dateToDateLong = (payload = {}) => {
   if (!dateIsValid(payload.date)) {
@@ -517,10 +536,29 @@ const dateToDateLong = (payload = {}) => {
  * @param {string} [payload.timeZone='Europe/Moscow'] - Часовой пояс
  * @return {string}
  * @example
- * dateToDateLong(new Date('2020-10-21')); // '21 октября 2020'
- * dateToDateLong(new Date('2020-10-21'), false, true); // '21 октября'
- * dateToDateLong(new Date('2020-10-21'), true, false); // 'ср, 21 октября'
- * dateToDateLong(new Date('2020-10-21'), true, true); // 'ср, 21 октября 2020'
+ * // '21 октября 2020'
+ * dateToDateLong({
+ *   date: new Date(2020, 9, 21),
+ * });
+ *
+ * // 'ср, 21 октября 2020'
+ * dateToDateLong({
+ *   date: new Date(2020, 9, 21),
+ *   showWeekDay: true,
+ * });
+ *
+ * // 'ср, 21 октября'
+ * dateToDateLong({
+ *   date: new Date(2020, 9, 21),
+ *   showWeekDay: true,
+ *   showYear: false,
+ * });
+ *
+ * // '21 октября'
+ * dateToDateLong({
+ *   date: new Date(2020, 9, 21),
+ *   showYear: false,
+ * });
  */
 exports.dateToDateLong = dateToDateLong;
 
@@ -598,8 +636,8 @@ exports.minutesToHoursMinutes = minutesToHoursMinutes;
  * @param {string} dateString
  * @return {{hour: string, minute: string, timestamp: number}}
  * @example
- * getMoscowTime('2022-05-02T08:00:00Z');
  * // { hour: '12', minute: '00', timestamp: 1643041320000 }
+ * getMoscowTime('2022-05-02T08:00:00Z');
  */
 const getMoscowTime = dateString => {
   const date = new Date(dateString);
@@ -632,8 +670,8 @@ const getMoscowTime = dateString => {
  * @param {string} dateString
  * @return {{hour: string, minute: string, timestamp: number}}
  * @example
- * getMoscowTime('2022-05-02T08:00:00Z');
  * // { hour: '12', minute: '00', timestamp: 1643041320000 }
+ * getMoscowTime('2022-05-02T08:00:00Z');
  */
 exports.getMoscowTime = getMoscowTime;
 
