@@ -87,6 +87,7 @@ getType(undefined); // 'Undefined'
 import { leadingZero } from 'purejs-helpers';
 
 leadingZero(9); // '09'
+leadingZero(42); // '42'
 ```
 
 ### Преобразование числа в сумму
@@ -105,9 +106,9 @@ currencyMask(1840.621, 3); // '1 840.621 ₽'
 import { dateIsValid } from 'purejs-helpers';
 
 dateIsValid(null); // false
-dateIsValid(new Date(); // true
-dateIsValid(new Date('9999-99-99'); // false
-dateIsValid(new Date('2023-03-16'); // true
+dateIsValid(new Date()); // true
+dateIsValid(new Date('9999-99-99')); // false
+dateIsValid(new Date('2023-03-16')); // true
 ```
 
 ### Преобразование даты в ISO формат
@@ -147,12 +148,29 @@ dateTime(new Date(2020, 9, 21, 8, 45)); // '21.10.2020, 08:45'
 ```javascript
 import { dateToDateLong } from 'purejs-helpers';
 
-const date = new Date(2020, 9, 21);
+// '21 октября 2020'
+dateToDateLong({
+  date: new Date(2020, 9, 21),
+});
 
-dateToDateLong(date); // '21 октября 2020'
-dateToDateLong(date, true); // 'ср, 21 октября 2020'
-dateToDateLong(date, true, false); // 'ср, 21 октября'
-dateToDateLong(date, false, false); // '21 октября'
+// 'ср, 21 октября 2020'
+dateToDateLong({
+  date: new Date(2020, 9, 21),
+  showWeekDay: true,
+});
+
+// 'ср, 21 октября'
+dateToDateLong({
+  date: new Date(2020, 9, 21),
+  showWeekDay: true,
+  showYear: false,
+});
+
+// '21 октября'
+dateToDateLong({
+  date: new Date(2020, 9, 21),
+  showYear: false,
+});
 ```
 
 ### Преобразование даты в формат HH:MM
@@ -169,6 +187,7 @@ dateToHoursMinutes(new Date(2020, 9, 21, 8, 45)); // '08:45'
 import { minutesToHoursMinutes } from 'purejs-helpers';
 
 minutesToHoursMinutes(480); // '08:00'
+minutesToHoursMinutes(-480); // '-08:00'
 ```
 
 ### Получение объекта с московским временем из даты
@@ -176,8 +195,8 @@ minutesToHoursMinutes(480); // '08:00'
 ```javascript
 import { getMoscowTime } from 'purejs-helpers';
 
-getMoscowTime('2022-05-02T08:00:00Z');
 // { hour: '12', minute: '00', timestamp: 1643041320000 }
+getMoscowTime('2022-05-02T08:00:00Z');
 ```
 
 ### Получение номера недели в году
