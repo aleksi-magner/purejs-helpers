@@ -770,7 +770,7 @@ describe('helpers.js', () => {
     },
   ];
 
-  test.each(maskCases)('maskIt', async payload => {
+  test.each(maskCases)('maskIt', payload => {
     const { mask, values, expected } = payload;
 
     values.forEach((value, index) => {
