@@ -19,6 +19,7 @@ import {
   getMoscowTime,
   weekOfYear,
   weekNumberToDate,
+  maskIt,
   wordEndings,
   distanceFormat,
   bytesToSize,
@@ -499,6 +500,284 @@ describe('helpers.js', () => {
     expect(weekNumberToDate(null)).toBeInstanceOf(Date);
     expect(weekNumberToDate(undefined)).toBeInstanceOf(Date);
     expect(weekNumberToDate('')).toBeInstanceOf(Date);
+  });
+
+  const maskCases = [
+    {
+      mask: '',
+      values: ['d-fg 123 t 667', 'd2g123t667'],
+      expected: [
+        {
+          clearValue: 'dfg123t667',
+          formatValue: '',
+          valid: true,
+        },
+        {
+          clearValue: 'd2g123t667',
+          formatValue: '',
+          valid: true,
+        },
+      ],
+    },
+    {
+      mask: 'gg4k5',
+      values: ['d-fg 123 t 667'],
+      expected: [
+        {
+          clearValue: 'dfg123t667',
+          formatValue: 'dfg12',
+          valid: true,
+        },
+      ],
+    },
+    {
+      mask: 'Z-ZZ/999 Z.999',
+      values: ['', 'dfg123t667', 'd-fg 123 t 667', 'd2g123t667', 'd2g123'],
+      expected: [
+        {
+          clearValue: '',
+          formatValue: '',
+          valid: false,
+        },
+        {
+          clearValue: 'dfg123t667',
+          formatValue: 'd-fg/123 t.667',
+          valid: true,
+        },
+        {
+          clearValue: 'dfg123t667',
+          formatValue: 'd-fg/123 t.667',
+          valid: true,
+        },
+        {
+          clearValue: 'd2g123t667',
+          formatValue: 'd-2g/123 t.667',
+          valid: false,
+        },
+        {
+          clearValue: 'd2g123',
+          formatValue: 'd-2g/123',
+          valid: false,
+        },
+      ],
+    },
+    {
+      mask: '+9 999 999-99-99',
+      values: [
+        70008564907,
+        '80008564907',
+        '70d0-0856_4.90$7',
+        '+7 000 85-64-907',
+        700085649,
+        '70d0-0856_4.$7',
+        null,
+        undefined,
+        '',
+      ],
+      expected: [
+        {
+          clearValue: '70008564907',
+          formatValue: '+7 000 856-49-07',
+          valid: true,
+        },
+        {
+          clearValue: '80008564907',
+          formatValue: '+8 000 856-49-07',
+          valid: true,
+        },
+        {
+          clearValue: '70d00856490$7',
+          formatValue: '+7 0d0 085-64-90',
+          valid: false,
+        },
+        {
+          clearValue: '70008564907',
+          formatValue: '+7 000 856-49-07',
+          valid: true,
+        },
+        {
+          clearValue: '700085649',
+          formatValue: '+7 000 856-49',
+          valid: false,
+        },
+        {
+          clearValue: '70d008564$7',
+          formatValue: '+7 0d0 085-64-$7',
+          valid: false,
+        },
+        {
+          clearValue: '',
+          formatValue: '',
+          valid: false,
+        },
+        {
+          clearValue: '',
+          formatValue: '',
+          valid: false,
+        },
+        {
+          clearValue: '',
+          formatValue: '',
+          valid: false,
+        },
+      ],
+    },
+    {
+      mask: '+7 999 xxx-xx-99',
+      values: [
+        80008564907,
+        '80008564907',
+        '90008564907',
+        '70d0-0856_4.90$7',
+        '+7 000 85-64-907',
+        700085649,
+        70008564,
+        '70d0-0856_4.$7',
+        null,
+        undefined,
+        '',
+      ],
+      expected: [
+        {
+          clearValue: '80008564907',
+          formatValue: '+7 000 xxx-xx-07',
+          valid: true,
+        },
+        {
+          clearValue: '80008564907',
+          formatValue: '+7 000 xxx-xx-07',
+          valid: true,
+        },
+        {
+          clearValue: '90008564907',
+          formatValue: '+7 000 xxx-xx-07',
+          valid: true,
+        },
+        {
+          clearValue: '70d00856490$7',
+          formatValue: '+7 0d0 xxx-xx-90',
+          valid: false,
+        },
+        {
+          clearValue: '70008564907',
+          formatValue: '+7 000 xxx-xx-07',
+          valid: true,
+        },
+        {
+          clearValue: '700085649',
+          formatValue: '+7 000 xxx-xx',
+          valid: false,
+        },
+        {
+          clearValue: '70008564',
+          formatValue: '+7 000 xxx-x',
+          valid: false,
+        },
+        {
+          clearValue: '70d008564$7',
+          formatValue: '+7 0d0 xxx-xx-$7',
+          valid: false,
+        },
+        {
+          clearValue: '',
+          formatValue: '',
+          valid: false,
+        },
+        {
+          clearValue: '',
+          formatValue: '',
+          valid: false,
+        },
+        {
+          clearValue: '',
+          formatValue: '',
+          valid: false,
+        },
+      ],
+    },
+    {
+      mask: '999-999',
+      values: [
+        123456,
+        '',
+        '1',
+        '12',
+        '123',
+        '1234',
+        '12345',
+        '123456',
+        '12345678',
+        '12-34-56',
+        '123-456',
+      ],
+      expected: [
+        {
+          clearValue: '123456',
+          formatValue: '123-456',
+          valid: true,
+        },
+        {
+          clearValue: '',
+          formatValue: '',
+          valid: false,
+        },
+        {
+          clearValue: '1',
+          formatValue: '1',
+          valid: false,
+        },
+        {
+          clearValue: '12',
+          formatValue: '12',
+          valid: false,
+        },
+        {
+          clearValue: '123',
+          formatValue: '123',
+          valid: false,
+        },
+        {
+          clearValue: '1234',
+          formatValue: '123-4',
+          valid: false,
+        },
+        {
+          clearValue: '12345',
+          formatValue: '123-45',
+          valid: false,
+        },
+        {
+          clearValue: '123456',
+          formatValue: '123-456',
+          valid: true,
+        },
+        {
+          clearValue: '12345678',
+          formatValue: '123-456',
+          valid: true,
+        },
+        {
+          clearValue: '123456',
+          formatValue: '123-456',
+          valid: true,
+        },
+        {
+          clearValue: '123456',
+          formatValue: '123-456',
+          valid: true,
+        },
+      ],
+    },
+  ];
+
+  test.each(maskCases)('maskIt', async payload => {
+    const { mask, values, expected } = payload;
+
+    values.forEach((value, index) => {
+      expect(maskIt.clear(value)).toBe(expected[index].clearValue);
+      expect(maskIt.format(mask, value)).toBe(expected[index].formatValue);
+      expect(maskIt.check(mask, value)).toBe(expected[index].valid);
+    });
   });
 
   test('wordEndings', () => {

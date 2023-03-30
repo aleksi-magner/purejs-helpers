@@ -215,6 +215,18 @@ import { weekNumberToDate } from 'purejs-helpers';
 weekNumberToDate(2020, 43); // Wed Oct 21 2020 00:00:00 GMT+0300
 ```
 
+### Форматирование по маске
+
+```javascript
+import { maskIt } from 'purejs-helpers';
+
+maskIt.format('+7 999 999-99-99', '12345678910'); // '+7 234 567-89-10'
+maskIt.format('ZZZ-xxx', 'АБВГДЕ'); // 'АБВ-xxx'
+maskIt.check('+7 999 999-99-99', '12345678910'); // true
+maskIt.check('+7 999 999-99-99', '+7 234 567-89-10'); // true
+maskIt.clear('+7 234 567-89-10') // '72345678910'
+```
+
 ### Окончания русских слов
 
 ```javascript

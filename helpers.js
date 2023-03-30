@@ -18,8 +18,8 @@ exports.locale = locale;
 /**
  * Определение окружения по домену
  * @function getEnvironment
- * @param {string} [name='verme'] - ключевое имя
- * @return {{server: string, mode: string}}
+ * @param {String} [name='verme'] - ключевое имя
+ * @return {{server: String, mode: String}}
  * @example https://any-verme.ru -> { server: 'any', mode: 'development' }
  */
 const getEnvironment = (name = 'verme') => {
@@ -37,8 +37,8 @@ const getEnvironment = (name = 'verme') => {
 /**
  * Определение окружения по домену
  * @function getEnvironment
- * @param {string} [name='verme'] - ключевое имя
- * @return {{server: string, mode: string}}
+ * @param {String} [name='verme'] - ключевое имя
+ * @return {{server: String, mode: String}}
  * @example https://any-verme.ru -> { server: 'any', mode: 'development' }
  */
 exports.getEnvironment = getEnvironment;
@@ -46,25 +46,25 @@ exports.getEnvironment = getEnvironment;
 /**
  * Определение казахского домена
  * @function isKZ
- * @return {boolean}
+ * @return {Boolean}
  * @example https://any-domain.kz -> true
  */
 const isKZ = () => window.location.hostname.includes('.kz');
 /**
  * Определение казахского домена
  * @function isKZ
- * @return {boolean}
+ * @return {Boolean}
  * @example https://any-domain.kz -> true
  */
 exports.isKZ = isKZ;
 
 /** Работа с Cookie */
-const cookie = {
+const cookie = Object.freeze({
   /**
    * Формирование опций cookie
    * @method createOptions
    * @param {Object} [options={}]
-   * @return {string}
+   * @return {String}
    */
   createOptions(options = {}) {
     const allowedOptions = [
@@ -144,8 +144,8 @@ const cookie = {
   /**
    * Получение значения из Cookie по ключу
    * @method get
-   * @param {string} name
-   * @return {string}
+   * @param {String} name
+   * @return {String}
    */
   get(name) {
     if (!name) {
@@ -168,16 +168,16 @@ const cookie = {
   /**
    * Установка значения в Cookie по ключу
    * @method set
-   * @param {string} name
-   * @param {string} value
+   * @param {String} name
+   * @param {String} value
    * @param {{
-   *   Domain?: string,
-   *   Path?: string,
-   *   Expires?: (Date|string),
-   *   'Max-Age'?: number,
-   *   HttpOnly?: boolean,
-   *   Secure?: boolean,
-   *   SameSite?: string
+   *   Domain?: String,
+   *   Path?: String,
+   *   Expires?: (Date|String),
+   *   'Max-Age'?: Number,
+   *   HttpOnly?: Boolean,
+   *   Secure?: Boolean,
+   *   SameSite?: String
    * }} [options]
    * @example SameSite: Strict | Lax | None
    */
@@ -198,7 +198,7 @@ const cookie = {
   /**
    * Удаление Cookie по ключу
    * @method delete
-   * @param {string} name
+   * @param {String} name
    */
   delete(name) {
     const value = this.get(name) ? '<removed>' : '';
@@ -207,7 +207,7 @@ const cookie = {
       'Max-Age': -1,
     });
   },
-};
+});
 /** Работа с Cookie */
 exports.cookie = cookie;
 
@@ -215,7 +215,7 @@ exports.cookie = cookie;
  * Определение типа переданного значения
  * @function getType
  * @param {*} [value]
- * @return {string}
+ * @return {String}
  * @example Undefined | Null | Number | String | Date | Function | Array | Object
  */
 const getType = value => {
@@ -232,7 +232,7 @@ const getType = value => {
  * Определение типа переданного значения
  * @function getType
  * @param {*} [value]
- * @return {string}
+ * @return {String}
  * @example Undefined | Null | Number | String | Date | Function | Array | Object
  */
 exports.getType = getType;
@@ -240,8 +240,8 @@ exports.getType = getType;
 /**
  * Добавление ведущего нуля
  * @function leadingZero
- * @param {string|number} value
- * @return {string}
+ * @param {String|Number} value
+ * @return {String}
  * @example
  * leadingZero(9); // '09'
  */
@@ -255,8 +255,8 @@ const leadingZero = value => {
 /**
  * Добавление ведущего нуля
  * @function leadingZero
- * @param {string|number} value
- * @return {string}
+ * @param {String|Number} value
+ * @return {String}
  * @example
  * leadingZero(9); // '09'
  */
@@ -265,9 +265,9 @@ exports.leadingZero = leadingZero;
 /**
  * Преобразование числа в сумму
  * @function currencyMask
- * @param {number|string} value - Значение суммы
- * @param {number} [fraction=1] - Количество символов после запятой
- * @return {string}
+ * @param {Number|String} value - Значение суммы
+ * @param {Number} [fraction=1] - Количество символов после запятой
+ * @return {String}
  * @example
  * currencyMask(1840); // '1 840 ₽'
  */
@@ -286,9 +286,9 @@ const currencyMask = (value, fraction = 1) => {
 /**
  * Преобразование числа в сумму
  * @function currencyMask
- * @param {number|string} value - Значение суммы
- * @param {number} [fraction=1] - Количество символов после запятой
- * @return {string}
+ * @param {Number|String} value - Значение суммы
+ * @param {Number} [fraction=1] - Количество символов после запятой
+ * @return {String}
  * @example
  * currencyMask(1840); // '1 840 ₽'
  */
@@ -298,7 +298,7 @@ exports.currencyMask = currencyMask;
  * Проверка объекта даты на валидность
  * @function dateIsValid
  * @param {Date} date
- * @return {boolean}
+ * @return {Boolean}
  */
 const dateIsValid = date =>
   [!!date, date instanceof Date, !Number.isNaN(new Date(date).getTime())].every(Boolean);
@@ -306,7 +306,7 @@ const dateIsValid = date =>
  * Проверка объекта даты на валидность
  * @function dateIsValid
  * @param {Date} date
- * @return {boolean}
+ * @return {Boolean}
  */
 exports.dateIsValid = dateIsValid;
 
@@ -314,7 +314,7 @@ exports.dateIsValid = dateIsValid;
  * Преобразование даты в ISO формат
  * @function toISODate
  * @param {Date} date
- * @return {string}
+ * @return {String}
  * @example
  * toISODate(new Date('2020-10-21T08:45:00')); // '2020-10-21'
  */
@@ -335,7 +335,7 @@ const toISODate = date => {
  * Преобразование даты в ISO формат
  * @function toISODate
  * @param {Date} date
- * @return {string}
+ * @return {String}
  * @example
  * toISODate(new Date('2020-10-21T08:45:00')); // '2020-10-21'
  */
@@ -345,8 +345,8 @@ exports.toISODate = toISODate;
  * Преобразование даты в формат DD.MM.YYYY
  * @function dateToDateShort
  * @param {Date} date - Дата
- * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
- * @return {string}
+ * @param {String} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {String}
  * @example
  * dateToDateShort(new Date('2020-10-21T08:45:00')); // '21.10.2020'
  */
@@ -371,8 +371,8 @@ const dateToDateShort = (date, timeZone = 'Europe/Moscow') => {
  * Преобразование даты в формат DD.MM.YYYY
  * @function dateToDateShort
  * @param {Date} date - Дата
- * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
- * @return {string}
+ * @param {String} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {String}
  * @example
  * dateToDateShort(new Date('2020-10-21T08:45:00')); // '21.10.2020'
  */
@@ -381,9 +381,9 @@ exports.dateToDateShort = dateToDateShort;
 /**
  * Преобразование ISO даты в формат DD.MM.YYYY
  * @function ISOToDateFormat
- * @param {string} ISODate - Дата в формате ISO
- * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
- * @return {string}
+ * @param {String} ISODate - Дата в формате ISO
+ * @param {String} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {String}
  * @example
  * ISOToDateFormat('1979-12-03'); // '03.12.1979'
  */
@@ -413,9 +413,9 @@ const ISOToDateFormat = (ISODate, timeZone = 'Europe/Moscow') => {
 /**
  * Преобразование ISO даты в формат DD.MM.YYYY
  * @function ISOToDateFormat
- * @param {string} ISODate - Дата в формате ISO
- * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
- * @return {string}
+ * @param {String} ISODate - Дата в формате ISO
+ * @param {String} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {String}
  * @example
  * ISOToDateFormat('1979-12-03'); // '03.12.1979'
  */
@@ -425,8 +425,8 @@ exports.ISOToDateFormat = ISOToDateFormat;
  * Преобразование даты в формат DD.MM.YYYY, HH:MM
  * @function dateTime
  * @param {Date} date - Дата
- * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
- * @return {string}
+ * @param {String} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {String}
  * @example
  * dateTime(new Date('2020-10-21T08:45:00')); // '21.10.2020, 08:45'
  */
@@ -454,8 +454,8 @@ const dateTime = (date, timeZone = 'Europe/Moscow') => {
  * Преобразование даты в формат DD.MM.YYYY, HH:MM
  * @function dateTime
  * @param {Date} date - Дата
- * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
- * @return {string}
+ * @param {String} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {String}
  * @example
  * dateTime(new Date('2020-10-21T08:45:00')); // '21.10.2020, 08:45'
  */
@@ -466,10 +466,10 @@ exports.dateTime = dateTime;
  * @function dateToDateLong
  * @param {Object} payload={}
  * @param {Date} payload.date - Дата
- * @param {boolean} [payload.showWeekDay=false] - Показ дня недели
- * @param {boolean} [payload.showYear=true] - Показ года
- * @param {string} [payload.timeZone='Europe/Moscow'] - Часовой пояс
- * @return {string}
+ * @param {Boolean} [payload.showWeekDay=false] - Показ дня недели
+ * @param {Boolean} [payload.showYear=true] - Показ года
+ * @param {String} [payload.timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {String}
  * @example
  * // '21 октября 2020'
  * dateToDateLong({
@@ -531,10 +531,10 @@ const dateToDateLong = (payload = {}) => {
  * @function dateToDateLong
  * @param {Object} payload={}
  * @param {Date} payload.date - Дата
- * @param {boolean} [payload.showWeekDay=false] - Показ дня недели
- * @param {boolean} [payload.showYear=true] - Показ года
- * @param {string} [payload.timeZone='Europe/Moscow'] - Часовой пояс
- * @return {string}
+ * @param {Boolean} [payload.showWeekDay=false] - Показ дня недели
+ * @param {Boolean} [payload.showYear=true] - Показ года
+ * @param {String} [payload.timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {String}
  * @example
  * // '21 октября 2020'
  * dateToDateLong({
@@ -566,8 +566,8 @@ exports.dateToDateLong = dateToDateLong;
  * Преобразование даты в формат HH:MM
  * @function dateToHoursMinutes
  * @param {Date} date - Дата
- * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
- * @return {string}
+ * @param {String} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {String}
  * @example
  * dateToHoursMinutes(new Date('2020-10-21')); // '08:45'
  */
@@ -592,8 +592,8 @@ const dateToHoursMinutes = (date, timeZone = 'Europe/Moscow') => {
  * Преобразование даты в формат HH:MM
  * @function dateToHoursMinutes
  * @param {Date} date - Дата
- * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
- * @return {string}
+ * @param {String} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {String}
  * @example
  * dateToHoursMinutes(new Date('2020-10-21')); // '08:45'
  */
@@ -602,8 +602,8 @@ exports.dateToHoursMinutes = dateToHoursMinutes;
 /**
  * Преобразование числа в формат HH:MM
  * @function minutesToHoursMinutes
- * @param {number} value
- * @return {string}
+ * @param {Number} value
+ * @return {String}
  * @example minutesToHoursMinutes(480); // '08:00'
  */
 const minutesToHoursMinutes = value => {
@@ -624,8 +624,8 @@ const minutesToHoursMinutes = value => {
 /**
  * Преобразование числа в формат HH:MM
  * @function minutesToHoursMinutes
- * @param {number} value
- * @return {string}
+ * @param {Number} value
+ * @return {String}
  * @example minutesToHoursMinutes(480); // '08:00'
  */
 exports.minutesToHoursMinutes = minutesToHoursMinutes;
@@ -633,8 +633,8 @@ exports.minutesToHoursMinutes = minutesToHoursMinutes;
 /**
  * Получение объекта с московским временем из даты
  * @function getMoscowTime
- * @param {string} dateString
- * @return {{hour: string, minute: string, timestamp: number}}
+ * @param {String} dateString
+ * @return {{hour: String, minute: String, timestamp: Number}}
  * @example
  * // { hour: '12', minute: '00', timestamp: 1643041320000 }
  * getMoscowTime('2022-05-02T08:00:00Z');
@@ -667,8 +667,8 @@ const getMoscowTime = dateString => {
 /**
  * Получение объекта с московским временем из даты
  * @function getMoscowTime
- * @param {string} dateString
- * @return {{hour: string, minute: string, timestamp: number}}
+ * @param {String} dateString
+ * @return {{hour: String, minute: String, timestamp: Number}}
  * @example
  * // { hour: '12', minute: '00', timestamp: 1643041320000 }
  * getMoscowTime('2022-05-02T08:00:00Z');
@@ -679,7 +679,7 @@ exports.getMoscowTime = getMoscowTime;
  * Получение номера недели в году
  * @function weekOfYear
  * @param {Date} [currentDate=Date] - Дата
- * @return {number}
+ * @return {Number}
  * @example
  * weekOfYear(new Date('2020-10-21')); // 43
  */
@@ -704,7 +704,7 @@ const weekOfYear = (currentDate = new Date()) => {
  * Получение номера недели в году
  * @function weekOfYear
  * @param {Date} [currentDate=Date] - Дата
- * @return {number}
+ * @return {Number}
  * @example
  * weekOfYear(new Date('2020-10-21')); // 43
  */
@@ -713,8 +713,8 @@ exports.weekOfYear = weekOfYear;
 /**
  * Получения даты начала недели по номеру недели
  * @function weekNumberToDate
- * @param {number} year
- * @param {number} weekNumber
+ * @param {Number} year
+ * @param {Number} weekNumber
  * @return {Date}
  * @example
  * weekNumberToDate(2020, 43); // Wed Oct 21 2020 00:00:00 GMT+0300
@@ -736,20 +736,164 @@ const weekNumberToDate = (year, weekNumber) => {
 /**
  * Получения даты начала недели по номеру недели
  * @function weekNumberToDate
- * @param {number} year
- * @param {number} weekNumber
+ * @param {Number} year
+ * @param {Number} weekNumber
  * @return {Date}
  * @example
  * weekNumberToDate(2020, 43); // Wed Oct 21 2020 00:00:00 GMT+0300
  */
 exports.weekNumberToDate = weekNumberToDate;
 
+/** Форматирование по маске */
+const maskIt = Object.freeze({
+  /**
+   * Набор спец.символов
+   * @type RegExp
+   */
+  special: /[\s-+/._]/,
+  /**
+   * Набор статических символов, без замены
+   * @type RegExp
+   */
+  static: /[7x]/,
+  /**
+   * Словарь для составления регулярных выражений
+   * @type Object
+   */
+  dictionary: Object.freeze({
+    Z: '[A-Z]',
+    9: '\\d',
+    7: '7',
+    x: 'x',
+    ' ': '\\s',
+    '+': '\\+',
+    '-': '-',
+    _: '_',
+    '/': '/',
+    '.': '\\.',
+  }),
+  /**
+   * Очистка маски
+   * @method clear
+   * @param {String} value
+   * @return {String}
+   * @example
+   * maskIt.clear('+7 234 567-89-10') // '72345678910'
+   */
+  clear(value) {
+    if (!value) {
+      return '';
+    }
+
+    const regExp = new RegExp(this.special, 'g');
+
+    return String(value).replace(regExp, '');
+  },
+  /**
+   * Формирование значения по маске
+   * @method format
+   * @param {String} mask
+   * @param {String} value
+   * @return {String}
+   * @example
+   * maskIt.format('+7 999 999-99-99', '12345678910'); // '+7 234 567-89-10'
+   * maskIt.format('ZZZ-xxx', 'АБВГДЕ'); // 'АБВ-xxx'
+   */
+  format(mask, value) {
+    const clearValue = this.clear(value);
+
+    if (!mask || !clearValue) {
+      return '';
+    }
+
+    const maskArray = mask.split('');
+
+    let count = 0;
+    let formatValue = '';
+
+    for (const symbol of maskArray) {
+      if (count < clearValue.length) {
+        const isSpecialCharacter = this.special.test(symbol);
+
+        if (isSpecialCharacter) {
+          formatValue += symbol;
+        } else {
+          const isStaticCharacter = this.static.test(symbol);
+
+          formatValue += isStaticCharacter ? symbol : clearValue.charAt(count);
+
+          count += 1;
+        }
+      } else {
+        break;
+      }
+    }
+
+    return formatValue;
+  },
+  /**
+   * Создание регулярного выражения по маске
+   * @method createRegExpByMask
+   * @param {String} [mask]
+   * @return {RegExp}
+   */
+  createRegExpByMask(mask) {
+    const fullValue = /.*/;
+
+    if (!mask) {
+      return fullValue;
+    }
+
+    let regExp = '';
+
+    const addRegExpRange = string => {
+      if (!string) {
+        return;
+      }
+
+      const symbol = string.charAt(0);
+
+      if (this.dictionary[symbol]) {
+        const { length } = string.match(new RegExp(`${this.dictionary[symbol]}*`))[0];
+
+        regExp += `${this.dictionary[symbol]}{${length}}`;
+
+        addRegExpRange(string.slice(length));
+      } else {
+        addRegExpRange(string.slice(1));
+      }
+    };
+
+    addRegExpRange(mask);
+
+    return regExp ? new RegExp(regExp, 'i') : fullValue;
+  },
+  /**
+   * Проверка значения по маске
+   * @method check
+   * @param {String} mask
+   * @param {String} value
+   * @return {Boolean}
+   * @example
+   * maskIt.check('+7 999 999-99-99', '12345678910'); // true
+   * maskIt.check('+7 999 999-99-99', '+7 234 567-89-10'); // true
+   */
+  check(mask, value) {
+    const regExp = this.createRegExpByMask(mask);
+    const formatValue = this.format(mask, value);
+
+    return regExp.test(formatValue);
+  },
+});
+/** Форматирование по маске */
+exports.maskIt = maskIt;
+
 /**
  * Окончания слов
  * @function wordEndings
- * @param {number|string} amount
+ * @param {Number|String} amount
  * @param {Array} titles
- * @return {string}
+ * @return {String}
  * @example
  * wordEndings(17, ['метр', 'метра', 'метров']); // '17 метров'
  */
@@ -783,9 +927,9 @@ const wordEndings = (amount, titles) => {
 /**
  * Окончания слов
  * @function wordEndings
- * @param {number|string} amount
+ * @param {Number|String} amount
  * @param {Array} titles
- * @return {string}
+ * @return {String}
  * @example
  * wordEndings(17, ['метр', 'метра', 'метров']); // '17 метров'
  */
@@ -794,9 +938,9 @@ exports.wordEndings = wordEndings;
 /**
  * Преобразование числа в расстояние
  * @function distanceFormat
- * @param {number|string} distance
- * @param {boolean} [short=false] - Сокращённый формат
- * @return {string}
+ * @param {Number|String} distance
+ * @param {Boolean} [short=false] - Сокращённый формат
+ * @return {String}
  * @example
  * distanceFormat(42); // '42 метра'
  * distanceFormat(42, true); // '42 м'
@@ -823,9 +967,9 @@ const distanceFormat = (distance, short = false) => {
 /**
  * Преобразование числа в расстояние
  * @function distanceFormat
- * @param {number|string} distance
- * @param {boolean} [short=false] - Сокращённый формат
- * @return {string}
+ * @param {Number|String} distance
+ * @param {Boolean} [short=false] - Сокращённый формат
+ * @return {String}
  * @example
  * distanceFormat(42); // '42 метра'
  * distanceFormat(42, true); // '42 м'
@@ -836,8 +980,8 @@ exports.distanceFormat = distanceFormat;
 /**
  * Получение преобразованного размера файла
  * @function bytesToSize
- * @param {number} bytes
- * @return {string}
+ * @param {Number} bytes
+ * @return {String}
  * @example bytesToSize(40031); // '39.09 кБ'
  */
 const bytesToSize = bytes => {
@@ -862,8 +1006,8 @@ const bytesToSize = bytes => {
 /**
  * Получение преобразованного размера файла
  * @function bytesToSize
- * @param {number} bytes
- * @return {string}
+ * @param {Number} bytes
+ * @return {String}
  * @example bytesToSize(40031); // '39.09 кБ'
  */
 exports.bytesToSize = bytesToSize;
@@ -872,7 +1016,7 @@ exports.bytesToSize = bytesToSize;
  * Преобразование файла в Base64
  * @function convertFileToBase64
  * @param {File} file
- * @return {Promise<string>}
+ * @return {Promise<String>}
  */
 const convertFileToBase64 = file => {
   if (!file) {
@@ -893,15 +1037,15 @@ const convertFileToBase64 = file => {
  * Преобразование файла в Base64
  * @function convertFileToBase64
  * @param {File} file
- * @return {Promise<string>}
+ * @return {Promise<String>}
  */
 exports.convertFileToBase64 = convertFileToBase64;
 
 /**
  * Сокращение ФИО до формата ФффИО или ФфффИ (если нет отчества)
  * @function shortName
- * @param {string} fullName
- * @return {string}
+ * @param {String} fullName
+ * @return {String}
  * @example
  * shortName('Светлова Александра Андреевна'); // 'СвеАА'
  * shortName('Бекр Фуркад'); // 'БекрФ'
@@ -935,8 +1079,8 @@ const shortName = fullName => {
 /**
  * Сокращение ФИО до формата ФффИО или ФфффИ (если нет отчества)
  * @function shortName
- * @param {string} fullName
- * @return {string}
+ * @param {String} fullName
+ * @return {String}
  * @example
  * shortName('Светлова Александра Андреевна'); // 'СвеАА'
  * shortName('Бекр Фуркад'); // 'БекрФ'
@@ -1050,9 +1194,9 @@ exports.memo = memo;
  * Поиск по поисковой фразе в списке по переданным ключам объекта
  * @function searchByKeys
  * @param {Object} payload={}
- * @param {string} [payload.search=''] - поисковая фраза
+ * @param {String} [payload.search=''] - поисковая фраза
  * @param {Object[]} [payload.options=[]] - список объектов
- * @param {string[]} [payload.keys=[]] - список ключей объекта
+ * @param {String[]} [payload.keys=[]] - список ключей объекта
  * @return {object[]} - Возвращает отфильтрованный список объект по поисковым словам
  */
 const searchByKeys = (payload = {}) => {
@@ -1088,9 +1232,9 @@ const searchByKeys = (payload = {}) => {
  * Поиск по поисковой фразе в списке по переданным ключам объекта
  * @function searchByKeys
  * @param {Object} payload={}
- * @param {string} [payload.search=''] - поисковая фраза
+ * @param {String} [payload.search=''] - поисковая фраза
  * @param {Object[]} [payload.options=[]] - список объектов
- * @param {string[]} [payload.keys=[]] - список ключей объекта
+ * @param {String[]} [payload.keys=[]] - список ключей объекта
  * @return {object[]} - Возвращает отфильтрованный список объект по поисковым словам
  */
 exports.searchByKeys = searchByKeys;
@@ -1098,7 +1242,7 @@ exports.searchByKeys = searchByKeys;
 /**
  * Проверка поддержки браузером копирования/вставки
  * @function checkClipboardFunctionality
- * @return {{copy: boolean, paste: boolean}}
+ * @return {{copy: Boolean, paste: Boolean}}
  */
 const checkClipboardFunctionality = async () => {
   const actions = {
@@ -1144,14 +1288,14 @@ const checkClipboardFunctionality = async () => {
 /**
  * Проверка поддержки браузером копирования/вставки
  * @function checkClipboardFunctionality
- * @return {{copy: boolean, paste: boolean}}
+ * @return {{copy: Boolean, paste: Boolean}}
  */
 exports.checkClipboardFunctionality = checkClipboardFunctionality;
 
 /**
  * Получение UTM-меток из поисковой строки
  * @function getUTMLabels
- * @param {string} prefix='utm_' - Префикс метки
+ * @param {String} prefix='utm_' - Префикс метки
  * @return {Object|null}
  */
 const getUTMLabels = async (prefix = 'utm_') => {
@@ -1174,7 +1318,7 @@ const getUTMLabels = async (prefix = 'utm_') => {
 /**
  * Получение UTM-меток из поисковой строки
  * @function getUTMLabels
- * @param {string} prefix='utm_' - Префикс метки
+ * @param {String} prefix='utm_' - Префикс метки
  * @return {Object|null}
  */
 exports.getUTMLabels = getUTMLabels;
