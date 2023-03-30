@@ -191,7 +191,7 @@ const cookie = Object.freeze({
       .map(string => encodeURIComponent(string.trim()))
       .join('=');
 
-    const params = this.createOptions(options);
+    const params = cookie.createOptions(options);
 
     document.cookie = [pair, params].join('; ');
   },
@@ -201,9 +201,9 @@ const cookie = Object.freeze({
    * @param {String} name
    */
   delete(name) {
-    const value = this.get(name) ? '<removed>' : '';
+    const value = cookie.get(name) ? '<removed>' : '';
 
-    this.set(name, value, {
+    cookie.set(name, value, {
       'Max-Age': -1,
     });
   },
@@ -776,7 +776,7 @@ const maskIt = Object.freeze({
       return '';
     }
 
-    const regExp = new RegExp(this.special, 'g');
+    const regExp = new RegExp(maskIt.special, 'g');
 
     return String(value).replace(regExp, '');
   },
@@ -791,7 +791,7 @@ const maskIt = Object.freeze({
    * maskIt.format('ZZZ-xxx', 'АБВГДЕ'); // 'АБВ-xxx'
    */
   format(mask, value) {
-    const clearValue = this.clear(value);
+    const clearValue = maskIt.clear(value);
 
     if (!mask || !clearValue) {
       return '';
@@ -804,12 +804,12 @@ const maskIt = Object.freeze({
 
     for (const symbol of maskArray) {
       if (count < clearValue.length) {
-        const isSpecialCharacter = this.special.test(symbol);
+        const isSpecialCharacter = maskIt.special.test(symbol);
 
         if (isSpecialCharacter) {
           formatValue += symbol;
         } else {
-          const isStaticCharacter = this.static.test(symbol);
+          const isStaticCharacter = maskIt.static.test(symbol);
 
           formatValue += isStaticCharacter ? symbol : clearValue.charAt(count);
 
@@ -844,10 +844,10 @@ const maskIt = Object.freeze({
 
       const symbol = string.charAt(0);
 
-      if (this.dictionary[symbol]) {
-        const { length } = string.match(new RegExp(`${this.dictionary[symbol]}*`))[0];
+      if (maskIt.dictionary[symbol]) {
+        const { length } = string.match(new RegExp(`${maskIt.dictionary[symbol]}*`))[0];
 
-        regExp += `${this.dictionary[symbol]}{${length}}`;
+        regExp += `${maskIt.dictionary[symbol]}{${length}}`;
 
         addRegExpRange(string.slice(length));
       } else {
@@ -870,8 +870,8 @@ const maskIt = Object.freeze({
    * maskIt.check('+7 999 999-99-99', '+7 234 567-89-10'); // true
    */
   check(mask, value) {
-    const regExp = this.createRegExpByMask(mask);
-    const formatValue = this.format(mask, value);
+    const regExp = maskIt.createRegExpByMask(mask);
+    const formatValue = maskIt.format(mask, value);
 
     return regExp.test(formatValue);
   },
