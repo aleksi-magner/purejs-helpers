@@ -746,21 +746,12 @@ exports.weekNumberToDate = weekNumberToDate;
 
 /** Форматирование по маске */
 const maskIt = Object.freeze({
-  /**
-   * Набор спец.символов
-   * @type RegExp
-   */
+  /** Набор спец.символов */
   special: /[\s-+/._]/,
-  /**
-   * Набор статических символов, без замены
-   * @type RegExp
-   */
+  /** Набор статических символов, без замены */
   static: /[7x]/,
-  /**
-   * Словарь для составления регулярных выражений
-   * @type Object
-   */
-  dictionary: Object.freeze({
+  /** Словарь для составления регулярных выражений */
+  dictionary: {
     Z: '[A-Z]',
     9: '\\d',
     7: '7',
@@ -771,7 +762,7 @@ const maskIt = Object.freeze({
     _: '_',
     '/': '/',
     '.': '\\.',
-  }),
+  },
   /**
    * Очистка маски
    * @method clear
