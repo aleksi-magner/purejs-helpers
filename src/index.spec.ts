@@ -1,4 +1,4 @@
-import { jest, beforeEach, afterEach, describe, test, expect } from '@jest/globals';
+import { vi, beforeEach, afterEach, describe, test, expect } from 'vitest';
 
 import {
   locale,
@@ -31,9 +31,9 @@ import {
   searchByKeys,
   checkClipboardFunctionality,
   getUTMLabels,
-} from './helpers';
+} from './index';
 
-describe('helpers.js', () => {
+describe('helpers', () => {
   test('locale', () => {
     expect(locale).toBe('ru-RU');
   });
@@ -98,15 +98,11 @@ describe('helpers.js', () => {
   ];
 
   test.each(envCases)('getEnvironment', ({ url, expected }) => {
-    const { location } = global.window;
-
-    delete global.window.location;
-
-    global.window.location = new URL(url);
+    global.window.location.assign(url);
 
     expect(getEnvironment()).toEqual(expected);
 
-    global.window.location = location;
+    global.window.location.assign('about:blank');
   });
 
   const kzCases = [
@@ -121,18 +117,16 @@ describe('helpers.js', () => {
   ];
 
   test.each(kzCases)('isKZ', ({ url, expected }) => {
-    const { location } = global.window;
-
-    delete global.window.location;
-
-    global.window.location = new URL(url);
+    global.window.location.assign(url);
 
     expect(isKZ()).toBe(expected);
 
-    global.window.location = location;
+    global.window.location.assign('about:blank');
   });
 
   test('cookie', () => {
+    global.window.location.assign('http://localhost:8080/');
+
     const documentCookie = global.document.cookie;
 
     expect(global.document.cookie).toBe('');
@@ -142,7 +136,6 @@ describe('helpers.js', () => {
     expect(global.document.cookie).toBe('any_code1=any_value%20text');
     expect(cookie.get('any_code1')).toBe('any_value text');
 
-    expect(cookie.get()).toBe('');
     expect(cookie.get('')).toBe('');
 
     cookie.set('', 'any_value text');
@@ -150,12 +143,10 @@ describe('helpers.js', () => {
     expect(global.document.cookie).toBe('any_code1=any_value%20text');
 
     cookie.set('any name', 'any_value text', {
-      any_code: 'any_value',
-      page: 42,
-      expires: new Date(3000, 11, 31),
+      Expires: new Date(3000, 11, 31),
       'Max-Age': 34874878946,
       SameSite: 'Strict',
-      Secure: '',
+      Secure: false,
     });
 
     expect(global.document.cookie).toBe('any_code1=any_value%20text; any%20name=any_value%20text');
@@ -170,13 +161,12 @@ describe('helpers.js', () => {
     cookie.set('secure', '', {
       Secure: true,
       HttpOnly: true,
-      expires: '2023-04-15T18:20:14.057Z',
+      Expires: '2023-04-15T18:20:14.057Z',
     });
 
     expect(global.document.cookie).toBe('any_code1=any_value%20text; any%20name=any_value%20text');
 
     cookie.set('any_code3', 'any...text.42', {
-      any_code: 'any_value',
       SameSite: 'Strict',
       Secure: false,
       'Max-Age': 34874878946,
@@ -213,6 +203,8 @@ describe('helpers.js', () => {
     expect(global.document.cookie).toBe('');
 
     global.document.cookie = documentCookie;
+
+    global.window.location.assign('about:blank');
   });
 
   test('getType', () => {
@@ -247,25 +239,18 @@ describe('helpers.js', () => {
     expect(currencyMask(1840.54, 2)).toBe('1 840,54 ₽');
     expect(currencyMask(null)).toBe('0 ₽');
     expect(currencyMask(undefined)).toBe('0 ₽');
-    expect(currencyMask('')).toBe('0 ₽');
+    expect(currencyMask(0)).toBe('0 ₽');
 
-    global.window = Object.create(window);
-
-    Object.defineProperty(window, 'location', {
-      value: {
-        hostname: 'test.server.kz',
-      },
-    });
+    window.location.assign('https://test.verme.kz/');
 
     expect(currencyMask(1840)).toBe('1 840 ₸');
     expect(currencyMask(1840.54, 2)).toBe('1 840,54 ₸');
+
+    global.window.location.assign('about:blank');
   });
 
   test('dateIsValid', () => {
     expect(dateIsValid()).toBe(false);
-    expect(dateIsValid('')).toBe(false);
-    expect(dateIsValid('2023-01-01')).toBe(false);
-    expect(dateIsValid(1675449307553)).toBe(false);
     expect(dateIsValid(new Date('22.04.2026T21:06:06+05:00'))).toBe(false);
     expect(dateIsValid(new Date('2022-32-33'))).toBe(false);
     expect(dateIsValid(new Date('2022-02-23'))).toBe(true);
@@ -274,7 +259,7 @@ describe('helpers.js', () => {
   test('toISODate', () => {
     const { DateTimeFormat } = Intl;
 
-    const dateTimeFormat = jest.spyOn(global.Intl, 'DateTimeFormat');
+    const dateTimeFormat = vi.spyOn(global.Intl, 'DateTimeFormat');
 
     dateTimeFormat.mockImplementation(
       (locale, options) =>
@@ -287,13 +272,8 @@ describe('helpers.js', () => {
     expect(toISODate(new Date('2022-04-26T21:06:06.405296+03:00'))).toBe('2022-04-26');
     expect(toISODate(new Date('2022-04-26T21:06:06+05:00'))).toBe('2022-04-26');
     expect(toISODate(new Date('2022-32-33'))).toBe('');
-    expect(toISODate('2022-01-01')).toBe('');
-    expect(toISODate('2022-32-33')).toBe('');
-    expect(toISODate('asdf')).toBe('');
-    expect(toISODate('one-two-20')).toBe('');
     expect(toISODate(null)).toBe('');
     expect(toISODate(undefined)).toBe('');
-    expect(toISODate('')).toBe('');
   });
 
   test('dateToDateShort', () => {
@@ -307,19 +287,12 @@ describe('helpers.js', () => {
     expect(dateToDateShort(new Date('2022-04-26T21:06:06+05:00'), '')).toBeDefined();
 
     expect(dateToDateShort(new Date('2022-32-33'))).toBe('');
-    expect(dateToDateShort('2022-01-01')).toBe('');
-    expect(dateToDateShort('2022-32-33')).toBe('');
-    expect(dateToDateShort('asdf')).toBe('');
-    expect(dateToDateShort('one-two-20')).toBe('');
     expect(dateToDateShort(null)).toBe('');
     expect(dateToDateShort(undefined)).toBe('');
-    expect(dateToDateShort('')).toBe('');
   });
 
   test('ISOToDateFormat', () => {
     expect(ISOToDateFormat('2022-04-26')).toBe('26.04.2022');
-    expect(ISOToDateFormat(new Date('2022-04-26'))).toBe('');
-    expect(ISOToDateFormat(42)).toBe('');
     expect(ISOToDateFormat('2022-04-26T21:06:06+05:00')).toBe('');
     expect(ISOToDateFormat(null)).toBe('');
     expect(ISOToDateFormat(undefined)).toBe('');
@@ -335,15 +308,16 @@ describe('helpers.js', () => {
     );
 
     expect(dateTime(new Date('2022-04-26T21:06:06+05:00'), '')).toBeDefined();
-    expect(dateTime('2022-01-01')).toBe('');
     expect(dateTime(null)).toBe('');
     expect(dateTime(undefined)).toBe('');
-    expect(dateTime('')).toBe('');
   });
 
   test('dateToDateLong', () => {
     const payload = {
       date: new Date('2022-04-26T21:06:06+05:00'),
+      showWeekDay: undefined,
+      showYear: undefined,
+      timeZone: undefined,
     };
 
     expect(dateToDateLong(payload)).toBe('26 апреля 2022');
@@ -384,31 +358,11 @@ describe('helpers.js', () => {
 
     expect(dateToDateLong(payload)).toBe('');
 
-    payload.date = '2022-01-01';
-
-    expect(dateToDateLong(payload)).toBe('');
-
-    payload.date = '2022-32-33';
-
-    expect(dateToDateLong(payload)).toBe('');
-
-    payload.date = 'asdf';
-
-    expect(dateToDateLong(payload)).toBe('');
-
-    payload.date = 'one-two-20';
-
-    expect(dateToDateLong(payload)).toBe('');
-
     payload.date = null;
 
     expect(dateToDateLong(payload)).toBe('');
 
     payload.date = undefined;
-
-    expect(dateToDateLong(payload)).toBe('');
-
-    payload.date = '';
 
     expect(dateToDateLong(payload)).toBe('');
 
@@ -426,22 +380,15 @@ describe('helpers.js', () => {
     expect(dateToHoursMinutes(new Date('2022-04-26T21:06:06+05:00'), '')).not.toBe('00:00');
 
     expect(dateToHoursMinutes(new Date('2022-32-33'))).toBe('00:00');
-    expect(dateToHoursMinutes('2022-01-01')).toBe('00:00');
-    expect(dateToHoursMinutes('2022-32-33')).toBe('00:00');
-    expect(dateToHoursMinutes('asdf')).toBe('00:00');
-    expect(dateToHoursMinutes('one-two-20')).toBe('00:00');
     expect(dateToHoursMinutes(null)).toBe('00:00');
     expect(dateToHoursMinutes(undefined)).toBe('00:00');
-    expect(dateToHoursMinutes('')).toBe('00:00');
   });
 
   test('minutesToHoursMinutes', () => {
     expect(minutesToHoursMinutes(480)).toBe('08:00');
     expect(minutesToHoursMinutes(-480)).toBe('-08:00');
-    expect(minutesToHoursMinutes('420')).toBe('00:00');
     expect(minutesToHoursMinutes(null)).toBe('00:00');
     expect(minutesToHoursMinutes(undefined)).toBe('00:00');
-    expect(minutesToHoursMinutes('')).toBe('00:00');
   });
 
   test('getMoscowTime', () => {
@@ -468,12 +415,6 @@ describe('helpers.js', () => {
       minute: '00',
       timestamp: 0,
     });
-
-    expect(getMoscowTime()).toEqual({
-      hour: '00',
-      minute: '00',
-      timestamp: 0,
-    });
   });
 
   test('weekOfYear', () => {
@@ -482,11 +423,7 @@ describe('helpers.js', () => {
     expect(weekOfYear(new Date('2020-10-21T01:06:06+05:00'))).toBe(43);
 
     expect(weekOfYear()).toBeGreaterThan(0);
-
-    expect(weekOfYear(42)).toBe(0);
-    expect(weekOfYear('2022-01-01')).toBe(0);
     expect(weekOfYear(null)).toBe(0);
-    expect(weekOfYear('')).toBe(0);
   });
 
   test('weekNumberToDate', () => {
@@ -495,11 +432,6 @@ describe('helpers.js', () => {
     expect(weekNumberToDate(2020, 43)).toStrictEqual(new Date('2020-10-18T21:00:00.000Z'));
 
     expect(weekNumberToDate(42, undefined)).toBeInstanceOf(Date);
-    expect(weekNumberToDate('2022', 17)).toBeInstanceOf(Date);
-    expect(weekNumberToDate('2022-01-01')).toBeInstanceOf(Date);
-    expect(weekNumberToDate(null)).toBeInstanceOf(Date);
-    expect(weekNumberToDate(undefined)).toBeInstanceOf(Date);
-    expect(weekNumberToDate('')).toBeInstanceOf(Date);
   });
 
   const maskCases = [
@@ -784,12 +716,6 @@ describe('helpers.js', () => {
     expect(wordEndings(0, ['метр', 'метра', 'метров'])).toBe('0 метров');
     expect(wordEndings(17, ['метр', 'метра', 'метров'])).toBe('17 метров');
     expect(wordEndings('1', ['метр', 'метра', 'метров'])).toBe('1 метр');
-    expect(wordEndings('42')).toBe('');
-    expect(wordEndings('42', ['метр', 'метра'])).toBe('');
-    expect(wordEndings('420', {})).toBe('');
-    expect(wordEndings(null)).toBe('');
-    expect(wordEndings(undefined)).toBe('');
-    expect(wordEndings('')).toBe('');
   });
 
   test('distanceFormat', () => {
@@ -797,7 +723,7 @@ describe('helpers.js', () => {
     expect(distanceFormat(1042)).toBe('1 км');
     expect(distanceFormat(1420)).toBe('1.4 км');
     expect(distanceFormat(42, true)).toBe('42 м');
-    expect(distanceFormat('420', {})).toBe('420 м');
+    expect(distanceFormat('420', !!{})).toBe('420 м');
     expect(distanceFormat(null)).toBe('');
     expect(distanceFormat(undefined)).toBe('');
     expect(distanceFormat('')).toBe('');
@@ -833,18 +759,13 @@ describe('helpers.js', () => {
     expect(shortName('Светлова Александра Андреевна')).toBe('СвеАА');
     expect(shortName('Бекр Фуркад')).toBe('БекрФ');
     expect(shortName('василий')).toBe('Васил');
+    expect(shortName('42')).toBe('――');
     expect(shortName('')).toBe('――');
-    expect(shortName(0)).toBe('――');
-    expect(shortName(400)).toBe('――');
     expect(shortName(null)).toBe('――');
     expect(shortName(undefined)).toBe('――');
-    expect(shortName({})).toBe('――');
-    expect(shortName([])).toBe('――');
   });
 
   test('removeObjectKeys', () => {
-    expect(removeObjectKeys()).toEqual({});
-    expect(removeObjectKeys(null)).toEqual({});
     expect(removeObjectKeys(null, null)).toEqual({});
     expect(removeObjectKeys([], null)).toEqual({});
     expect(removeObjectKeys(['a'], null)).toEqual({});
@@ -990,10 +911,21 @@ describe('helpers.js', () => {
   });
 
   describe('Check Clipboard', () => {
-    const errorCopy = async () => Promise.reject(new Error('write text don`t support'));
-    const errorPaste = async () => Promise.reject(new Error('read text don`t support'));
-    const successCopy = async value => value;
-    const successPaste = async () => 'Text from clipboard';
+    const copy = (type: 'success' | 'error') => {
+      if (type === 'success') {
+        return value => Promise.resolve(value);
+      }
+
+      return () => Promise.reject(new Error('write text don`t support'));
+    };
+
+    const paste = (type: 'success' | 'error') => {
+      if (type === 'success') {
+        return () => Promise.resolve('Text from clipboard');
+      }
+
+      return () => Promise.reject(new Error('read text don`t support'));
+    };
 
     const query = async ({ name = '' }) =>
       new Promise((resolve, reject) => {
@@ -1008,32 +940,18 @@ describe('helpers.js', () => {
         return reject(new Error('this name value don`t support'));
       });
 
-    const originalNavigator = window.navigator;
-    const originalConsole = console.error;
-
-    beforeEach(() => {
-      delete window.navigator;
-
-      console.error = jest.fn();
-    });
-
-    afterEach(() => {
-      global.window.navigator = originalNavigator;
-      console.error = originalConsole;
-    });
-
     const cases = [
       {
-        navigator: {},
+        handleNavigator: <Navigator>{},
         expected: {
           isCanCopy: false,
           isCanPaste: false,
         },
       },
       {
-        navigator: {
-          clipboard: {},
-          permissions: {},
+        handleNavigator: <Navigator>{
+          clipboard: <Clipboard>{},
+          permissions: <Permissions>{},
         },
         expected: {
           isCanCopy: false,
@@ -1041,11 +959,11 @@ describe('helpers.js', () => {
         },
       },
       {
-        navigator: {
-          clipboard: {
-            writeText: errorCopy,
+        handleNavigator: <Navigator>{
+          clipboard: <Clipboard>{
+            writeText: copy('error'),
           },
-          permissions: { query },
+          permissions: <Permissions>{ query },
         },
         expected: {
           isCanCopy: false,
@@ -1053,12 +971,12 @@ describe('helpers.js', () => {
         },
       },
       {
-        navigator: {
-          clipboard: {
-            writeText: successCopy,
-            readText: errorPaste,
+        handleNavigator: <Navigator>{
+          clipboard: <Clipboard>{
+            writeText: copy('success'),
+            readText: paste('error'),
           },
-          permissions: {
+          permissions: <Permissions>{
             query: query.bind(null, { name: 'any' }),
           },
         },
@@ -1068,12 +986,12 @@ describe('helpers.js', () => {
         },
       },
       {
-        navigator: {
-          clipboard: {
-            writeText: successCopy,
-            readText: successPaste,
+        handleNavigator: <Navigator>{
+          clipboard: <Clipboard>{
+            writeText: copy('success'),
+            readText: paste('success'),
           },
-          permissions: {
+          permissions: <Permissions>{
             query: query.bind(null, { name: 'any' }),
           },
         },
@@ -1083,12 +1001,12 @@ describe('helpers.js', () => {
         },
       },
       {
-        navigator: {
-          clipboard: {
-            writeText: successCopy,
-            readText: successPaste,
+        handleNavigator: <Navigator>{
+          clipboard: <Clipboard>{
+            writeText: copy('success'),
+            readText: paste('success'),
           },
-          permissions: { query },
+          permissions: <Permissions>{ query },
         },
         expected: {
           isCanCopy: true,
@@ -1098,14 +1016,25 @@ describe('helpers.js', () => {
     ];
 
     test.each(cases)('checkClipboardFunctionality', async payload => {
-      const { navigator, expected } = payload;
+      const { handleNavigator, expected } = payload;
 
-      global.window.navigator = navigator;
+      const { navigator } = global.window;
+
+      delete global.window.navigator;
+
+      global.window.navigator = handleNavigator;
+
+      const { error } = console;
+
+      console.error = vi.fn();
 
       const { copy, paste } = await checkClipboardFunctionality();
 
       expect(copy).toBe(expected.isCanCopy);
       expect(paste).toBe(expected.isCanPaste);
+
+      global.window.navigator = navigator;
+      console.error = error;
     });
   });
 
@@ -1152,18 +1081,14 @@ describe('helpers.js', () => {
   ];
 
   test.each(utmCases)('getUTMLabels', async payload => {
-    const { location } = window;
-
-    delete window.location;
-
     const { locationSearch, expected } = payload;
 
-    global.window.location = new URL(`https://shifts.verme.ru/${locationSearch}`);
+    global.window.location.assign(`https://shifts.verme.ru/${locationSearch}`);
 
     const labels = await getUTMLabels();
 
     expect(labels).toEqual(expected);
 
-    global.window.location = location;
+    global.window.location.assign('about:blank');
   });
 });
