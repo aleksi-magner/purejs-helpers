@@ -666,6 +666,10 @@ export const wordEndings = (amount: number | string, titles: [string, string, st
   const number: number = Number.parseFloat(String(amount || 0));
   const formatNumber: string = new Intl.NumberFormat('ru-RU').format(number);
 
+  if (!number) {
+    return '';
+  }
+
   let word;
 
   // RU
