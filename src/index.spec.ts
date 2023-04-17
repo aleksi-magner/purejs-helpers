@@ -713,8 +713,8 @@ describe('helpers', () => {
   });
 
   test('wordEndings', () => {
-    expect(wordEndings(0, ['метр', 'метра', 'метров'])).toBe('');
-    expect(wordEndings('0.0', ['метр', 'метра', 'метров'])).toBe('');
+    expect(wordEndings(0, ['метр', 'метра', 'метров'])).toBe('0 метров');
+    expect(wordEndings('0.0', ['метр', 'метра', 'метров'])).toBe('0 метров');
     expect(wordEndings(17, ['метр', 'метра', 'метров'])).toBe('17 метров');
     expect(wordEndings('1', ['метр', 'метра', 'метров'])).toBe('1 метр');
   });
