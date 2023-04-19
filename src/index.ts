@@ -1,5 +1,10 @@
 /** Локализация по умолчанию */
-export const locale: string = 'ru-RU';
+export const locale: 'ru-RU' = 'ru-RU';
+
+type Environment = {
+  server: string;
+  mode: 'development' | 'production';
+};
 
 /**
  * Определение окружения по домену
@@ -8,7 +13,7 @@ export const locale: string = 'ru-RU';
  * getEnvironment('verme')
  * // { server: 'any', mode: 'development' }
  */
-export const getEnvironment = (name: string = 'verme'): { server: string; mode: string } => {
+export const getEnvironment = (name: string = 'verme'): Environment => {
   const URL: string = window.location.hostname;
 
   const isLocalServer: boolean = ['127.0.0.1', 'localhost'].includes(URL);
@@ -218,8 +223,8 @@ export const leadingZero = (value: string | number): string => {
  */
 export const currencyMask = (value: number | undefined | null, fraction: number = 1): string => {
   const KZ: boolean = isKZ();
-  const currencyLocale: 'ru-RU' | 'ru-KZ' = KZ ? 'ru-KZ' : 'ru-RU';
-  const currency: 'RUB' | 'KZT' = KZ ? 'KZT' : 'RUB';
+  const currencyLocale = KZ ? 'ru-KZ' : 'ru-RU';
+  const currency = KZ ? 'KZT' : 'RUB';
 
   return new Intl.NumberFormat(currencyLocale, {
     style: 'currency',
@@ -531,7 +536,7 @@ type MaskHelpers = {
   /** Набор статических символов, без замены */
   readonly static: RegExp;
   /** Словарь для составления регулярных выражений */
-  readonly dictionary: { [key: string]: string };
+  readonly dictionary: Record<string, string>;
   /** Создание регулярного выражения по маске */
   readonly createRegExpByMask: (mask?: string | undefined) => RegExp;
 };
@@ -799,7 +804,7 @@ export const shortName = (fullName: string): string => {
  * removeObjectKeys(['a'], { a: 13, b: 42 }); // { b: 42 }
  */
 export const removeObjectKeys = (exclusionFields: string[], sourceObject: {}): {} => {
-  const object: { [key: string]: unknown } = { ...(sourceObject || {}) };
+  const object: Record<string, unknown> = { ...(sourceObject || {}) };
 
   (exclusionFields || []).forEach((key: string): void => {
     delete object[key];
@@ -816,7 +821,7 @@ export const deepClone = (sourceObject: any): any => {
     return new Date(<Date>sourceObject);
   }
 
-  const clone: any[] | { [key: string]: any } = Array.isArray(sourceObject)
+  const clone: any[] | Record<string, any> = Array.isArray(sourceObject)
     ? [].concat(<[]>sourceObject)
     : Object.assign({}, <{}>sourceObject);
 
@@ -882,15 +887,15 @@ export const searchByKeys = (payload: SearchOptions = {}): Array<{}> => {
       .toLowerCase()
       .match(/[\p{L}\d]+/gimu) || [];
 
-  return options.flatMap(item => {
+  return options.flatMap((item: {}): [] | [{}] => {
     const concatValue: string = searchableKeys
       .map((key: string) => {
         const nestedKey: string[] = key.split('.');
 
         // Если ключ с вложениями, перебираем все вложения
         // key a.b, object.a.b: 'value' -> 'value'
-        const nestedValue: { [key: string]: any } = nestedKey.reduce(
-          (accumulator: { [key: string]: any }, prop: string) => accumulator?.[prop],
+        const nestedValue: Record<string, any> = nestedKey.reduce(
+          (accumulator: Record<string, any>, prop: string) => accumulator?.[prop],
           item,
         );
 
@@ -959,7 +964,7 @@ export const checkClipboardFunctionality = async (): Promise<ClipboardActions> =
 export const getUTMLabels = async (prefix: string = 'utm_'): Promise<{} | null> => {
   const queryString: string = window.location.search;
 
-  const data: { [key: string]: any } = {};
+  const data: Record<string, any> = {};
 
   if (queryString.includes(prefix)) {
     const urlParams: URLSearchParams = new URLSearchParams(queryString);
