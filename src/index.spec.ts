@@ -1,4 +1,4 @@
-import { vi, beforeEach, afterEach, describe, test, expect } from 'vitest';
+import { vi, describe, test, expect } from 'vitest';
 
 import {
   locale,
@@ -912,13 +912,7 @@ describe('helpers', () => {
   });
 
   describe('Check Clipboard', () => {
-    const copy = (type: 'success' | 'error') => {
-      if (type === 'success') {
-        return value => Promise.resolve(value);
-      }
-
-      return () => Promise.reject(new Error('write text don`t support'));
-    };
+    const copy = value => Promise.resolve(value);
 
     const paste = (type: 'success' | 'error') => {
       if (type === 'success') {
@@ -952,18 +946,6 @@ describe('helpers', () => {
       {
         handleNavigator: <Navigator>{
           clipboard: <Clipboard>{},
-          permissions: <Permissions>{},
-        },
-        expected: {
-          isCanCopy: false,
-          isCanPaste: false,
-        },
-      },
-      {
-        handleNavigator: <Navigator>{
-          clipboard: <Clipboard>{
-            writeText: copy('error'),
-          },
           permissions: <Permissions>{ query },
         },
         expected: {
@@ -974,7 +956,7 @@ describe('helpers', () => {
       {
         handleNavigator: <Navigator>{
           clipboard: <Clipboard>{
-            writeText: copy('success'),
+            writeText: copy,
             readText: paste('error'),
           },
           permissions: <Permissions>{
@@ -989,7 +971,7 @@ describe('helpers', () => {
       {
         handleNavigator: <Navigator>{
           clipboard: <Clipboard>{
-            writeText: copy('success'),
+            writeText: copy,
             readText: paste('success'),
           },
           permissions: <Permissions>{
@@ -1004,7 +986,7 @@ describe('helpers', () => {
       {
         handleNavigator: <Navigator>{
           clipboard: <Clipboard>{
-            writeText: copy('success'),
+            writeText: copy,
             readText: paste('success'),
           },
           permissions: <Permissions>{ query },

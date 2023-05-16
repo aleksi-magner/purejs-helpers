@@ -931,15 +931,7 @@ export const checkClipboardFunctionality = async (): Promise<ClipboardActions> =
   const { clipboard = {}, permissions = {} } = <Navigator>window.navigator;
 
   // Проверяем доступность функционала копирования в браузере
-  if ('writeText' in clipboard) {
-    try {
-      await (<Clipboard>clipboard).writeText('');
-
-      actions.copy = true;
-    } catch (error) {
-      console.error(`Check copy filed. ${(<Error>error).message}`);
-    }
-  }
+  actions.copy = 'writeText' in clipboard;
 
   // Проверяем доступность функционала вставки в браузере
   if (['query' in permissions, 'readText' in clipboard].every(Boolean)) {
