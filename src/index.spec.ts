@@ -98,11 +98,11 @@ describe('helpers', () => {
   ];
 
   test.each(envCases)('getEnvironment', ({ url, expected }) => {
-    global.window.location.assign(url);
+    window.location.assign(url);
 
     expect(getEnvironment()).toEqual(expected);
 
-    global.window.location.assign('about:blank');
+    window.location.assign('about:blank');
   });
 
   const kzCases = [
@@ -117,30 +117,30 @@ describe('helpers', () => {
   ];
 
   test.each(kzCases)('isKZ', ({ url, expected }) => {
-    global.window.location.assign(url);
+    window.location.assign(url);
 
     expect(isKZ()).toBe(expected);
 
-    global.window.location.assign('about:blank');
+    window.location.assign('about:blank');
   });
 
   test('cookie', () => {
-    global.window.location.assign('http://localhost:8080/');
+    window.location.assign('http://localhost:8080/');
 
-    const documentCookie = global.document.cookie;
+    const documentCookie = document.cookie;
 
-    expect(global.document.cookie).toBe('');
+    expect(document.cookie).toBe('');
 
     cookie.set('any_code1', 'any_value text');
 
-    expect(global.document.cookie).toBe('any_code1=any_value%20text');
+    expect(document.cookie).toBe('any_code1=any_value%20text');
     expect(cookie.get('any_code1')).toBe('any_value text');
 
     expect(cookie.get('')).toBe('');
 
     cookie.set('', 'any_value text');
 
-    expect(global.document.cookie).toBe('any_code1=any_value%20text');
+    expect(document.cookie).toBe('any_code1=any_value%20text');
 
     cookie.set('any name', 'any_value text', {
       Expires: new Date(3000, 11, 31),
@@ -149,14 +149,14 @@ describe('helpers', () => {
       Secure: false,
     });
 
-    expect(global.document.cookie).toBe('any_code1=any_value%20text; any%20name=any_value%20text');
+    expect(document.cookie).toBe('any_code1=any_value%20text; any%20name=any_value%20text');
     expect(cookie.get('any name')).toBe('any_value text');
 
     cookie.set('outside domain', 'any_value text', {
       Domain: 'domain.com',
     });
 
-    expect(global.document.cookie).toBe('any_code1=any_value%20text; any%20name=any_value%20text');
+    expect(document.cookie).toBe('any_code1=any_value%20text; any%20name=any_value%20text');
 
     cookie.set('secure', '', {
       Secure: true,
@@ -164,7 +164,7 @@ describe('helpers', () => {
       Expires: '2023-04-15T18:20:14.057Z',
     });
 
-    expect(global.document.cookie).toBe('any_code1=any_value%20text; any%20name=any_value%20text');
+    expect(document.cookie).toBe('any_code1=any_value%20text; any%20name=any_value%20text');
 
     cookie.set('any_code3', 'any...text.42', {
       SameSite: 'Strict',
@@ -172,7 +172,7 @@ describe('helpers', () => {
       'Max-Age': 34874878946,
     });
 
-    expect(global.document.cookie).toBe(
+    expect(document.cookie).toBe(
       'any_code1=any_value%20text; any%20name=any_value%20text; any_code3=any...text.42',
     );
 
@@ -184,7 +184,7 @@ describe('helpers', () => {
       'Max-Age': 34874878946,
     });
 
-    expect(global.document.cookie).toBe(
+    expect(document.cookie).toBe(
       'any_code1=any_value%20text; any%20name=any_value%20text; any_code3=any...text.42; any_code4',
     );
 
@@ -200,11 +200,11 @@ describe('helpers', () => {
     expect(cookie.get('any_code3')).toBe('');
     expect(cookie.get('any_code4')).toBe('');
 
-    expect(global.document.cookie).toBe('');
+    expect(document.cookie).toBe('');
 
-    global.document.cookie = documentCookie;
+    document.cookie = documentCookie;
 
-    global.window.location.assign('about:blank');
+    window.location.assign('about:blank');
   });
 
   test('getType', () => {
@@ -246,7 +246,7 @@ describe('helpers', () => {
     expect(currencyMask(1840)).toBe('1 840 ₸');
     expect(currencyMask(1840.54, 2)).toBe('1 840,54 ₸');
 
-    global.window.location.assign('about:blank');
+    window.location.assign('about:blank');
   });
 
   test('dateIsValid', () => {
@@ -259,7 +259,7 @@ describe('helpers', () => {
   test('toISODate', () => {
     const { DateTimeFormat } = Intl;
 
-    const dateTimeFormat = vi.spyOn(global.Intl, 'DateTimeFormat');
+    const dateTimeFormat = vi.spyOn(Intl, 'DateTimeFormat');
 
     dateTimeFormat.mockImplementation(
       (locale, options) =>
@@ -744,12 +744,12 @@ describe('helpers', () => {
   });
 
   test('convertFileToBase64', async () => {
-    const validFileContent = '<tag1>Test file for Jest<tag1>';
+    const validFileContent = '<tag1>Test file<tag1>';
     const validFile = new File([validFileContent], 'File.xml', { type: 'text/xml' });
 
     const validFileInBase64 = await convertFileToBase64(validFile);
 
-    expect(validFileInBase64).toBe('PHRhZzE+VGVzdCBmaWxlIGZvciBKZXN0PHRhZzE+');
+    expect(validFileInBase64).toBe('PHRhZzE+VGVzdCBmaWxlPHRhZzE+');
 
     const emptyFile = await convertFileToBase64(null);
 
@@ -1001,11 +1001,11 @@ describe('helpers', () => {
     test.each(cases)('checkClipboardFunctionality', async payload => {
       const { handleNavigator, expected } = payload;
 
-      const { navigator } = global.window;
+      const { navigator } = window;
 
-      delete global.window.navigator;
+      delete window.navigator;
 
-      global.window.navigator = handleNavigator;
+      window.navigator = handleNavigator;
 
       const { error } = console;
 
@@ -1016,7 +1016,7 @@ describe('helpers', () => {
       expect(copy).toBe(expected.isCanCopy);
       expect(paste).toBe(expected.isCanPaste);
 
-      global.window.navigator = navigator;
+      window.navigator = navigator;
       console.error = error;
     });
   });
@@ -1063,15 +1063,15 @@ describe('helpers', () => {
     },
   ];
 
-  test.each(utmCases)('getUTMLabels', async payload => {
+  test.each(utmCases)('getUTMLabels', payload => {
     const { locationSearch, expected } = payload;
 
-    global.window.location.assign(`https://shifts.verme.ru/${locationSearch}`);
+    window.location.assign(`https://shifts.verme.ru/${locationSearch}`);
 
-    const labels = await getUTMLabels();
+    const labels = getUTMLabels();
 
     expect(labels).toEqual(expected);
 
-    global.window.location.assign('about:blank');
+    window.location.assign('about:blank');
   });
 });

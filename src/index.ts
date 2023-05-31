@@ -953,7 +953,7 @@ export const checkClipboardFunctionality = async (): Promise<ClipboardActions> =
 };
 
 /** Получение UTM-меток из поисковой строки */
-export const getUTMLabels = async (prefix: string = 'utm_'): Promise<{} | null> => {
+export const getUTMLabels = (prefix: string = 'utm_'): {} | null => {
   const queryString: string = window.location.search;
 
   const data: Record<string, any> = {};
