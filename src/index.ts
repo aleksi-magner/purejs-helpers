@@ -1,5 +1,5 @@
 /** Локализация по умолчанию */
-export const locale: 'ru-RU' = 'ru-RU';
+export const locale = 'ru-RU';
 
 type Environment = {
   server: string;
@@ -18,7 +18,7 @@ export const getEnvironment = (name: string = 'verme'): Environment => {
 
   const isLocalServer: boolean = ['127.0.0.1', 'localhost'].includes(URL);
   const regExp: RegExp = new RegExp(['(?=-).*(?=\\.', name, ')'].join(''));
-  const environment: string = URL.match(regExp)?.[0].replace('-', '') || 'production';
+  const environment: string = regExp.exec(URL)?.[0].replace('-', '') ?? 'production';
 
   return {
     server: environment,
@@ -68,14 +68,14 @@ type Cookie = {
 /** Работа с Cookie */
 export const cookie: Readonly<Cookie> = Object.freeze({
   createOptions(options: CookieCreateOptions = {}): string {
-    const allowedOptions: string[] = [
-      'Domain',
-      'Path',
-      'Expires',
-      'Max-Age',
-      'HttpOnly',
-      'Secure',
-      'SameSite',
+    const allowedOptions: Array<keyof CookieOptions> = [
+      <keyof CookieOptions>'Domain',
+      <keyof CookieOptions>'Path',
+      <keyof CookieOptions>'Expires',
+      <keyof CookieOptions>'Max-Age',
+      <keyof CookieOptions>'HttpOnly',
+      <keyof CookieOptions>'Secure',
+      <keyof CookieOptions>'SameSite',
     ];
 
     const cookieOptions: CookieOptions = {
@@ -83,51 +83,49 @@ export const cookie: Readonly<Cookie> = Object.freeze({
     };
 
     for (const key in options) {
-      const option: string | undefined = allowedOptions.find(
+      const option: keyof CookieOptions | undefined = allowedOptions.find(
         (code: string): boolean => code.toLowerCase() === key.toLowerCase(),
       );
 
+      if (!option) {
+        continue;
+      }
+
       const value = options[<keyof CookieCreateOptions>key];
 
-      switch (option) {
-        case 'Domain':
-        case 'Path':
-          if (typeof value === 'string') {
-            cookieOptions[option] = value;
-          }
+      switch (true) {
+        case ['Domain', 'Path'].includes(option) && typeof value === 'string': {
+          cookieOptions[<'Domain' | 'Path'>option] = <string>value;
 
           break;
+        }
 
-        case 'Expires': {
-          cookieOptions[option] =
-            value instanceof Date ? (<Date>value).toUTCString() : <string>value;
+        case option === 'Expires': {
+          cookieOptions[<'Expires'>option] =
+            value instanceof Date ? value.toUTCString() : <string>value;
 
           delete cookieOptions['Max-Age'];
 
           break;
         }
 
-        case 'Max-Age': {
-          if (typeof value === 'number') {
-            cookieOptions[option] = <number>value;
+        case option === 'Max-Age' && typeof value === 'number': {
+          cookieOptions[<'Max-Age'>option] = <number>value;
 
-            delete cookieOptions['Expires'];
-          }
+          delete cookieOptions['Expires'];
 
           break;
         }
 
-        case 'HttpOnly':
-        case 'Secure':
-          if (value === true) {
-            cookieOptions[option] = '';
-          }
+        case ['HttpOnly', 'Secure'].includes(option) && value === true: {
+          cookieOptions[<'HttpOnly' | 'Secure'>option] = '';
 
           break;
+        }
 
-        case 'SameSite': {
+        case option === 'SameSite': {
           if (['None', 'Strict', 'Lax'].some((code: string): boolean => code === value)) {
-            cookieOptions[option] = <string>value;
+            cookieOptions[<'SameSite'>option] = <string>value;
           }
 
           break;
@@ -231,7 +229,7 @@ export const currencyMask = (value: number | undefined | null, fraction: number 
     currency,
     minimumFractionDigits: 0,
     maximumFractionDigits: fraction,
-  }).format(value || 0);
+  }).format(value ?? 0);
 };
 
 /** Проверка объекта даты на валидность */
@@ -506,7 +504,7 @@ export const weekOfYear = (currentDate: Date = new Date()): number => {
   date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
 
   const firstWeek: Date = new Date(date.getFullYear(), 0, 4);
-  const MILLISECONDS_IN_DAY: 86400000 = 86400000; // 24 * 60 * 60 * 1000
+  const MILLISECONDS_IN_DAY = 86400000; // 24 * 60 * 60 * 1000
 
   const currentYearDay: number = (date.getTime() - firstWeek.getTime()) / MILLISECONDS_IN_DAY;
 
@@ -542,7 +540,7 @@ type MaskHelpers = {
 };
 
 const maskItHelpers: MaskHelpers = {
-  special: /[\s-+/._]/,
+  special: /[\s-+/._{}()[\]]/,
   static: /[7x]/,
   dictionary: {
     Z: '[A-Z]',
@@ -555,6 +553,12 @@ const maskItHelpers: MaskHelpers = {
     _: '_',
     '/': '/',
     '.': '\\.',
+    '(': '\\(',
+    ')': '\\)',
+    '{': '\\{',
+    '}': '\\}',
+    '[': '\\[',
+    ']': '\\]',
   },
   createRegExpByMask(mask: string | undefined): RegExp {
     const fullValue: RegExp = /.*/;
@@ -574,7 +578,7 @@ const maskItHelpers: MaskHelpers = {
 
       if (maskItHelpers.dictionary[symbol]) {
         const matchArray: RegExpMatchArray = <RegExpMatchArray>(
-          string.match(new RegExp(`${maskItHelpers.dictionary[symbol]}*`))
+          new RegExp(`${maskItHelpers.dictionary[symbol]}*`).exec(string)
         );
 
         const { length } = <string>matchArray.at(0);
@@ -726,7 +730,7 @@ export const bytesToSize = (bytes: number): string => {
     return '0 байт';
   }
 
-  const kiloByte: 1024 = 1024;
+  const kiloByte = 1024;
   const unit: string[] = ['байт', 'кБ', 'МБ', 'ГБ', 'ТБ', 'ПБ', 'ЭБ', 'ЗБ', 'ИБ'];
 
   if (bytes < kiloByte) {
@@ -773,7 +777,7 @@ export const shortName = (fullName: string): string => {
     return '――';
   }
 
-  const splitFullName: RegExpMatchArray | [] = fullName.match(/[^\s\d_.,'"`;:]+/gi) || [];
+  const splitFullName: RegExpMatchArray | [] = fullName.match(/[^\s\d_.,'"`;:]+/gi) ?? [];
 
   const [surname, firstname, patronymic] = splitFullName.map((item: string) =>
     [item.charAt(0).toUpperCase(), item.slice(1)].join(''),
@@ -818,7 +822,7 @@ export const deepClone = (sourceObject: any): any => {
   if (!sourceObject || typeof sourceObject !== 'object') {
     return sourceObject;
   } else if (sourceObject instanceof Date) {
-    return new Date(<Date>sourceObject);
+    return new Date(sourceObject);
   }
 
   const clone: any[] | Record<string, any> = Array.isArray(sourceObject)
@@ -852,7 +856,7 @@ export const memo = (callback: Function): Function =>
   new Proxy(callback, <MemoHandler>{
     cache: new Map(),
     apply(fn: Function, context: any, args: any[]) {
-      args.sort();
+      args.sort((a, b) => (a > b ? 1 : -1));
 
       const key: string = args.toString();
 
@@ -878,14 +882,14 @@ type SearchOptions = {
  * @description Возвращает отфильтрованный список объект по поисковым словам.
  */
 export const searchByKeys = (payload: SearchOptions = {}): Array<{}> => {
-  const search: string = payload.search || '';
-  const options: Array<{}> = payload.options || [];
-  const searchableKeys: string[] = payload.keys || [];
+  const search: string = payload.search ?? '';
+  const options: Array<{}> = payload.options ?? [];
+  const searchableKeys: string[] = payload.keys ?? [];
 
   const searchWords: RegExpMatchArray | [] =
     String(search)
       .toLowerCase()
-      .match(/[\p{L}\d]+/gimu) || [];
+      .match(/[\p{L}\d]+/gimu) ?? [];
 
   return options.flatMap((item: {}): [] | [{}] => {
     const concatValue: string = searchableKeys
@@ -928,7 +932,7 @@ export const checkClipboardFunctionality = async (): Promise<ClipboardActions> =
     return actions;
   }
 
-  const { clipboard = {}, permissions = {} } = <Navigator>window.navigator;
+  const { clipboard = {}, permissions = {} } = window.navigator;
 
   // Проверяем доступность функционала копирования в браузере
   actions.copy = 'writeText' in clipboard;

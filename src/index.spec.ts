@@ -162,6 +162,7 @@ describe('helpers', () => {
       Secure: true,
       HttpOnly: true,
       Expires: '2023-04-15T18:20:14.057Z',
+      WrongField: '2023-04-15T18:20:14.057Z',
     });
 
     expect(document.cookie).toBe('any_code1=any_value%20text; any%20name=any_value%20text');
@@ -463,6 +464,22 @@ describe('helpers', () => {
       ],
     },
     {
+      mask: '+7 (999) {999}-[999]_999',
+      values: ['+7 (123) {456}-[789]_111', '7123456789111'],
+      expected: [
+        {
+          clearValue: '7123456789111',
+          formatValue: '+7 (123) {456}-[789]_111',
+          valid: true,
+        },
+        {
+          clearValue: '7123456789111',
+          formatValue: '+7 (123) {456}-[789]_111',
+          valid: true,
+        },
+      ],
+    },
+    {
       mask: 'Z-ZZ/999 Z.999',
       values: ['', 'dfg123t667', 'd-fg 123 t 667', 'd2g123t667', 'd2g123'],
       expected: [
@@ -500,6 +517,7 @@ describe('helpers', () => {
         '80008564907',
         '70d0-0856_4.90$7',
         '+7 000 85-64-907',
+        '7 (928) 280-07-00',
         700085649,
         '70d0-0856_4.$7',
         null,
@@ -525,6 +543,11 @@ describe('helpers', () => {
         {
           clearValue: '70008564907',
           formatValue: '+7 000 856-49-07',
+          valid: true,
+        },
+        {
+          clearValue: '79282800700',
+          formatValue: '+7 928 280-07-00',
           valid: true,
         },
         {
@@ -560,6 +583,7 @@ describe('helpers', () => {
         80008564907,
         '80008564907',
         '90008564907',
+        '7 (928) 280-07-00',
         '70d0-0856_4.90$7',
         '+7 000 85-64-907',
         700085649,
@@ -583,6 +607,11 @@ describe('helpers', () => {
         {
           clearValue: '90008564907',
           formatValue: '+7 000 xxx-xx-07',
+          valid: true,
+        },
+        {
+          clearValue: '79282800700',
+          formatValue: '+7 928 xxx-xx-00',
           valid: true,
         },
         {
