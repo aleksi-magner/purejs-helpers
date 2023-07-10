@@ -224,12 +224,14 @@ export const currencyMask = (value: number | undefined | null, fraction: number 
   const currencyLocale = KZ ? 'ru-KZ' : 'ru-RU';
   const currency = KZ ? 'KZT' : 'RUB';
 
+  const number: number = !value || Number.isNaN(value) ? 0 : value;
+
   return new Intl.NumberFormat(currencyLocale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
     maximumFractionDigits: fraction,
-  }).format(value ?? 0);
+  }).format(number);
 };
 
 /** Проверка объекта даты на валидность */
