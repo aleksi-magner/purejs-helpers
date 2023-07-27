@@ -258,9 +258,9 @@ describe('helpers', () => {
   });
 
   test('toISODate', () => {
-    const { DateTimeFormat } = Intl;
+    const { DateTimeFormat } = window.Intl;
 
-    const dateTimeFormat = vi.spyOn(Intl, 'DateTimeFormat');
+    const dateTimeFormat = vi.spyOn(window.Intl, 'DateTimeFormat');
 
     dateTimeFormat.mockImplementation(
       (locale, options) =>
@@ -943,7 +943,7 @@ describe('helpers', () => {
   describe('Check Clipboard', () => {
     const copy = value => Promise.resolve(value);
 
-    const paste = (type: 'success' | 'error') => {
+    const paste = type => {
       if (type === 'success') {
         return () => Promise.resolve('Text from clipboard');
       }
@@ -966,16 +966,16 @@ describe('helpers', () => {
 
     const cases = [
       {
-        handleNavigator: <Navigator>{},
+        handleNavigator: {},
         expected: {
           isCanCopy: false,
           isCanPaste: false,
         },
       },
       {
-        handleNavigator: <Navigator>{
-          clipboard: <Clipboard>{},
-          permissions: <Permissions>{ query },
+        handleNavigator: {
+          clipboard: {},
+          permissions: { query },
         },
         expected: {
           isCanCopy: false,
@@ -983,12 +983,12 @@ describe('helpers', () => {
         },
       },
       {
-        handleNavigator: <Navigator>{
-          clipboard: <Clipboard>{
+        handleNavigator: {
+          clipboard: {
             writeText: copy,
             readText: paste('error'),
           },
-          permissions: <Permissions>{
+          permissions: {
             query: query.bind(null, { name: 'any' }),
           },
         },
@@ -998,12 +998,12 @@ describe('helpers', () => {
         },
       },
       {
-        handleNavigator: <Navigator>{
-          clipboard: <Clipboard>{
+        handleNavigator: {
+          clipboard: {
             writeText: copy,
             readText: paste('success'),
           },
-          permissions: <Permissions>{
+          permissions: {
             query: query.bind(null, { name: 'any' }),
           },
         },
@@ -1013,12 +1013,12 @@ describe('helpers', () => {
         },
       },
       {
-        handleNavigator: <Navigator>{
-          clipboard: <Clipboard>{
+        handleNavigator: {
+          clipboard: {
             writeText: copy,
             readText: paste('success'),
           },
-          permissions: <Permissions>{ query },
+          permissions: { query },
         },
         expected: {
           isCanCopy: true,

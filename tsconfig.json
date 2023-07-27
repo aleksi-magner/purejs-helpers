@@ -7,13 +7,13 @@
     "moduleResolution": "node",
 
     /* Language and Environment */
-    "target": "ES6",
-    "lib": ["ES6", "DOM", "DOM.Iterable"],
+    "target": "ES2018",
+    "lib": ["ES2018", "DOM", "DOM.Iterable"],
     "useDefineForClassFields": true,
 
     /* Emit */
     "outDir": "dist",
-    "noEmit": true,
+    "noEmit": false,
 
     /* Completeness */
     "skipLibCheck": true,
