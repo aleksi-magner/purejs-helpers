@@ -1,5 +1,5 @@
 /** Локализация по умолчанию */
-export const locale = 'ru-RU';
+export const locale: string = 'ru-RU';
 
 type Environment = {
   server: string;
@@ -187,12 +187,17 @@ export const cookie: Readonly<Cookie> = Object.freeze({
 /** Определение типа переданного значения */
 export const getType = (value?: any): string => {
   switch (value) {
-    case undefined:
+    case undefined: {
       return 'Undefined';
-    case null:
+    }
+
+    case null: {
       return 'Null';
-    default:
+    }
+
+    default: {
       return value.constructor.name;
+    }
   }
 };
 
@@ -221,8 +226,8 @@ export const leadingZero = (value: string | number): string => {
  */
 export const currencyMask = (value: number | undefined | null, fraction: number = 1): string => {
   const KZ: boolean = isKZ();
-  const currencyLocale = KZ ? 'ru-KZ' : 'ru-RU';
-  const currency = KZ ? 'KZT' : 'RUB';
+  const currencyLocale: string = KZ ? 'ru-KZ' : 'ru-RU';
+  const currency: string = KZ ? 'KZT' : 'RUB';
 
   const number: number = !value || Number.isNaN(value) ? 0 : value;
 
@@ -403,7 +408,7 @@ export const dateToDateLong = (payload: DateToDateLong = {}): string => {
     options.timeZone = timeZone;
   }
 
-  const longDate: string = new Intl.DateTimeFormat(locale, options).format(date);
+  const longDate: string = new Intl.DateTimeFormat(locale, options).format(<Date>date);
 
   return showYear ? longDate.slice(0, -3) : longDate;
 };
@@ -442,7 +447,7 @@ export const minutesToHoursMinutes = (value: number): string => {
   const number: number = invalid ? 0 : value;
 
   const absNumber: number = Math.abs(number);
-  const sign: '-' | '' = number < 0 ? '-' : '';
+  const sign: string = number < 0 ? '-' : '';
 
   const hours: string = leadingZero(Math.floor(absNumber / 60));
   const minutes: string = leadingZero(absNumber % 60);
@@ -809,8 +814,11 @@ export const shortName = (fullName: string): string => {
  * @example
  * removeObjectKeys(['a'], { a: 13, b: 42 }); // { b: 42 }
  */
-export const removeObjectKeys = (exclusionFields: string[], sourceObject: {}): {} => {
-  const object: Record<string, unknown> = { ...(sourceObject || {}) };
+export const removeObjectKeys = (
+  exclusionFields: string[],
+  sourceObject: {},
+): Record<string, any> => {
+  const object: Record<string, any> = { ...(sourceObject || {}) };
 
   (exclusionFields || []).forEach((key: string): void => {
     delete object[key];
@@ -825,19 +833,31 @@ export const deepClone = (sourceObject: any): any => {
     return sourceObject;
   } else if (sourceObject instanceof Date) {
     return new Date(sourceObject);
+  } else if (Array.isArray(sourceObject)) {
+    const arrayClone: any[] = [...sourceObject];
+
+    for (let index = 0; index < arrayClone.length; index += 1) {
+      const value = arrayClone[index];
+
+      if (typeof value === 'object') {
+        arrayClone[index] = deepClone(value);
+      }
+    }
+
+    return arrayClone;
   }
 
-  const clone: any[] | Record<string, any> = Array.isArray(sourceObject)
-    ? [].concat(<[]>sourceObject)
-    : Object.assign({}, <{}>sourceObject);
+  const objectClone: Record<string, any> = Object.assign({}, <Record<string, any>>sourceObject);
 
-  Object.keys(clone).forEach((key: string | number): void => {
+  Object.keys(objectClone).forEach((key: string): void => {
     const value = sourceObject[key];
 
-    clone[key] = typeof value === 'object' ? deepClone(value) : value;
+    if (typeof value === 'object') {
+      objectClone[key] = deepClone(value);
+    }
   });
 
-  return clone;
+  return objectClone;
 };
 
 type MemoHandler = {
@@ -872,7 +892,7 @@ export const memo = (callback: Function): Function =>
 
 type SearchOptions = {
   search?: string;
-  options?: Array<{}>;
+  options?: Record<string, any>[];
   keys?: string[];
 };
 
@@ -883,9 +903,9 @@ type SearchOptions = {
  * @description keys - список ключей объекта.
  * @description Возвращает отфильтрованный список объект по поисковым словам.
  */
-export const searchByKeys = (payload: SearchOptions = {}): Array<{}> => {
+export const searchByKeys = (payload: SearchOptions = {}): Record<string, any>[] => {
   const search: string = payload.search ?? '';
-  const options: Array<{}> = payload.options ?? [];
+  const options: Record<string, any>[] = payload.options ?? [];
   const searchableKeys: string[] = payload.keys ?? [];
 
   const searchWords: RegExpMatchArray | [] =
@@ -893,7 +913,7 @@ export const searchByKeys = (payload: SearchOptions = {}): Array<{}> => {
       .toLowerCase()
       .match(/[\p{L}\d]+/gimu) ?? [];
 
-  return options.flatMap((item: {}): [] | [{}] => {
+  return options.flatMap((item: Record<string, any>): Record<string, any>[] => {
     const concatValue: string = searchableKeys
       .map((key: string) => {
         const nestedKey: string[] = key.split('.');
@@ -959,7 +979,7 @@ export const checkClipboardFunctionality = async (): Promise<ClipboardActions> =
 };
 
 /** Получение UTM-меток из поисковой строки */
-export const getUTMLabels = (prefix: string = 'utm_'): {} | null => {
+export const getUTMLabels = (prefix: string = 'utm_'): Record<string, any> | null => {
   const queryString: string = window.location.search;
 
   const data: Record<string, any> = {};
