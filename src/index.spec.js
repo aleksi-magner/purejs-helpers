@@ -43,6 +43,7 @@ describe('helpers', () => {
       url: 'http://localhost:8080/',
       expected: {
         server: 'production',
+        isLocal: true,
         mode: 'development',
       },
     },
@@ -50,6 +51,7 @@ describe('helpers', () => {
       url: 'http://127.0.0.1:8080/',
       expected: {
         server: 'production',
+        isLocal: true,
         mode: 'development',
       },
     },
@@ -57,6 +59,7 @@ describe('helpers', () => {
       url: 'https://server.verme.ru/',
       expected: {
         server: 'production',
+        isLocal: false,
         mode: 'production',
       },
     },
@@ -64,6 +67,7 @@ describe('helpers', () => {
       url: 'https://server.verme.kz/',
       expected: {
         server: 'production',
+        isLocal: false,
         mode: 'production',
       },
     },
@@ -71,6 +75,7 @@ describe('helpers', () => {
       url: 'https://server-dev.verme.ru/',
       expected: {
         server: 'dev',
+        isLocal: false,
         mode: 'development',
       },
     },
@@ -78,6 +83,7 @@ describe('helpers', () => {
       url: 'https://server-demo.verme.ru/',
       expected: {
         server: 'demo',
+        isLocal: false,
         mode: 'development',
       },
     },
@@ -85,6 +91,7 @@ describe('helpers', () => {
       url: 'https://server-rc.verme.ru/',
       expected: {
         server: 'rc',
+        isLocal: false,
         mode: 'development',
       },
     },
@@ -92,6 +99,7 @@ describe('helpers', () => {
       url: 'https://server-test.verme.ru/',
       expected: {
         server: 'test',
+        isLocal: false,
         mode: 'development',
       },
     },
@@ -100,7 +108,7 @@ describe('helpers', () => {
   test.each(envCases)('getEnvironment', ({ url, expected }) => {
     window.location.assign(url);
 
-    expect(getEnvironment()).toEqual(expected);
+    expect(getEnvironment('verme')).toEqual(expected);
 
     window.location.assign('about:blank');
   });

@@ -3,6 +3,7 @@ export const locale: string = 'ru-RU';
 
 type Environment = {
   server: string;
+  isLocal: boolean;
   mode: 'development' | 'production';
 };
 
@@ -11,17 +12,23 @@ type Environment = {
  * @example
  * https://any-verme.ru
  * getEnvironment('verme')
- * // { server: 'any', mode: 'development' }
+ * // { server: 'any', isLocal: false, mode: 'development' }
  */
-export const getEnvironment = (name: string = 'verme'): Environment => {
-  const URL: string = window.location.hostname;
+export const getEnvironment = (name: string = ''): Environment => {
+  const host: string = window.location.hostname;
 
-  const isLocalServer: boolean = ['127.0.0.1', 'localhost'].includes(URL);
+  const isLocalServer: boolean = Boolean(
+    host === 'localhost' ||
+      // IPv4 localhost address
+      /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/.test(host),
+  );
+
   const regExp: RegExp = new RegExp(['(?=-).*(?=\\.', name, ')'].join(''));
-  const environment: string = regExp.exec(URL)?.[0].replace('-', '') ?? 'production';
+  const environment: string = regExp.exec(host)?.[0].replace('-', '') ?? 'production';
 
   return {
     server: environment,
+    isLocal: isLocalServer,
     mode: isLocalServer || environment !== 'production' ? 'development' : 'production',
   };
 };
