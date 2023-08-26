@@ -1,7 +1,7 @@
 /** Локализация по умолчанию */
 export const locale: string = 'ru-RU';
 
-type Environment = {
+export type Environment = {
   server: string;
   isLocal: boolean;
   mode: 'development' | 'production';
@@ -41,7 +41,7 @@ export const getEnvironment = (name: string = ''): Environment => {
  */
 export const isKZ = (): boolean => window.location.hostname.includes('.kz');
 
-type CookieCreateOptions = {
+export type CookieCreateOptions = {
   Domain?: string;
   Path?: string;
   Expires?: Date | string;
@@ -61,7 +61,7 @@ type CookieOptions = {
   SameSite?: string;
 };
 
-type Cookie = {
+export type Cookie = {
   /** Формирование опций cookie */
   createOptions: (options?: CookieCreateOptions) => string;
   /** Получение значения из Cookie по ключу */
@@ -354,7 +354,7 @@ export const dateTime = (date: Date, timeZone: string = 'Europe/Moscow'): string
   return new Intl.DateTimeFormat(locale, options).format(date);
 };
 
-type DateToDateLong = {
+export type DateToDateLong = {
   date?: Date;
   showWeekDay?: boolean;
   showYear?: boolean;
@@ -464,7 +464,7 @@ export const minutesToHoursMinutes = (value: number): string => {
   return [sign, time].join('');
 };
 
-type HourTimestamp = {
+export type HourTimestamp = {
   hour: string;
   minute: string;
   timestamp: number;
@@ -611,7 +611,7 @@ const maskItHelpers: MaskHelpers = {
   },
 };
 
-type MaskMethods = {
+export type MaskMethods = {
   readonly clear: (value: string | number) => string;
   /**
    * Формирование значения по маске
@@ -897,7 +897,7 @@ export const memo = (callback: Function): Function =>
     },
   });
 
-type SearchOptions = {
+export type SearchOptions = {
   search?: string;
   options?: Record<string, any>[];
   keys?: string[];
@@ -945,7 +945,7 @@ export const searchByKeys = (payload: SearchOptions = {}): Record<string, any>[]
   });
 };
 
-type ClipboardActions = {
+export type ClipboardActions = {
   copy: boolean;
   paste: boolean;
 };
