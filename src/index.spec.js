@@ -8,6 +8,9 @@ import {
   getType,
   leadingZero,
   currencyMask,
+  wordEndings,
+  distanceFormat,
+  bytesToSize,
   dateIsValid,
   toISODate,
   dateToDateShort,
@@ -20,9 +23,6 @@ import {
   weekOfYear,
   weekNumberToDate,
   maskIt,
-  wordEndings,
-  distanceFormat,
-  bytesToSize,
   convertFileToBase64,
   shortName,
   removeObjectKeys,
@@ -258,6 +258,37 @@ describe('helpers', () => {
     window.location.assign('about:blank');
   });
 
+  test('wordEndings', () => {
+    expect(wordEndings(0, ['метр', 'метра', 'метров'])).toBe('0 метров');
+    expect(wordEndings('0.0', ['метр', 'метра', 'метров'])).toBe('0 метров');
+    expect(wordEndings(17, ['метр', 'метра', 'метров'])).toBe('17 метров');
+    expect(wordEndings('1', ['метр', 'метра', 'метров'])).toBe('1 метр');
+  });
+
+  test('distanceFormat', () => {
+    expect(distanceFormat(42)).toBe('42 метра');
+    expect(distanceFormat(1042)).toBe('1 км');
+    expect(distanceFormat(1420)).toBe('1.4 км');
+    expect(distanceFormat(42, true)).toBe('42 м');
+    expect(distanceFormat('420', !!{})).toBe('420 м');
+    expect(distanceFormat(null)).toBe('');
+    expect(distanceFormat(undefined)).toBe('');
+    expect(distanceFormat('')).toBe('');
+  });
+
+  test('bytesToSize', () => {
+    expect(bytesToSize(0)).toBe('0 байт');
+    expect(bytesToSize(1000)).toBe('1 000 байт');
+    expect(bytesToSize(40031)).toBe('39.09 кБ');
+    expect(bytesToSize(40031456)).toBe('38.18 МБ');
+    expect(bytesToSize(40314564546)).toBe('37.55 ГБ');
+    expect(bytesToSize(4003145646546)).toBe('3.64 ТБ');
+    expect(bytesToSize(4003147895276546)).toBe('3.56 ПБ');
+    expect(bytesToSize(+'40031478952795646546')).toBe('34.72 ЭБ');
+    expect(bytesToSize(+'4003147895279564654656')).toBe('3.39 ЗБ');
+    expect(bytesToSize(+'400314789527956465462451090')).toBe('331.13 ИБ');
+  });
+
   test('dateIsValid', () => {
     expect(dateIsValid()).toBe(false);
     expect(dateIsValid(new Date('22.04.2026T21:06:06+05:00'))).toBe(false);
@@ -393,11 +424,49 @@ describe('helpers', () => {
     expect(dateToHoursMinutes(undefined)).toBe('00:00');
   });
 
-  test('minutesToHoursMinutes', () => {
-    expect(minutesToHoursMinutes(480)).toBe('08:00');
-    expect(minutesToHoursMinutes(-480)).toBe('-08:00');
-    expect(minutesToHoursMinutes(null)).toBe('00:00');
-    expect(minutesToHoursMinutes(undefined)).toBe('00:00');
+  const minutesToHoursMinutesCases = [
+    {
+      minutes: null,
+      time: '00:00',
+      byParts: '0 минут',
+    },
+    {
+      minutes: -60,
+      time: '-01:00',
+      byParts: '-1 час',
+    },
+    {
+      minutes: 0,
+      time: '00:00',
+      byParts: '0 минут',
+    },
+    {
+      minutes: 15,
+      time: '00:15',
+      byParts: '15 минут',
+    },
+    {
+      minutes: 120,
+      time: '02:00',
+      byParts: '2 часа',
+    },
+    {
+      minutes: 145,
+      time: '02:25',
+      byParts: '2 ч. 25 мин.',
+    },
+    {
+      minutes: 42,
+      time: '00:42',
+      byParts: '42 минуты',
+    },
+  ];
+
+  test.each(minutesToHoursMinutesCases)('minutesToHoursMinutes', payload => {
+    const { minutes, time, byParts } = payload;
+
+    expect(minutesToHoursMinutes(minutes)).toBe(time);
+    expect(minutesToHoursMinutes(minutes, true)).toBe(byParts);
   });
 
   test('getMoscowTime', () => {
@@ -747,37 +816,6 @@ describe('helpers', () => {
       expect(maskIt.format(mask, value)).toBe(expected[index].formatValue);
       expect(maskIt.check(mask, value)).toBe(expected[index].valid);
     });
-  });
-
-  test('wordEndings', () => {
-    expect(wordEndings(0, ['метр', 'метра', 'метров'])).toBe('0 метров');
-    expect(wordEndings('0.0', ['метр', 'метра', 'метров'])).toBe('0 метров');
-    expect(wordEndings(17, ['метр', 'метра', 'метров'])).toBe('17 метров');
-    expect(wordEndings('1', ['метр', 'метра', 'метров'])).toBe('1 метр');
-  });
-
-  test('distanceFormat', () => {
-    expect(distanceFormat(42)).toBe('42 метра');
-    expect(distanceFormat(1042)).toBe('1 км');
-    expect(distanceFormat(1420)).toBe('1.4 км');
-    expect(distanceFormat(42, true)).toBe('42 м');
-    expect(distanceFormat('420', !!{})).toBe('420 м');
-    expect(distanceFormat(null)).toBe('');
-    expect(distanceFormat(undefined)).toBe('');
-    expect(distanceFormat('')).toBe('');
-  });
-
-  test('bytesToSize', () => {
-    expect(bytesToSize(0)).toBe('0 байт');
-    expect(bytesToSize(1000)).toBe('1 000 байт');
-    expect(bytesToSize(40031)).toBe('39.09 кБ');
-    expect(bytesToSize(40031456)).toBe('38.18 МБ');
-    expect(bytesToSize(40314564546)).toBe('37.55 ГБ');
-    expect(bytesToSize(4003145646546)).toBe('3.64 ТБ');
-    expect(bytesToSize(4003147895276546)).toBe('3.56 ПБ');
-    expect(bytesToSize(+'40031478952795646546')).toBe('34.72 ЭБ');
-    expect(bytesToSize(+'4003147895279564654656')).toBe('3.39 ЗБ');
-    expect(bytesToSize(+'400314789527956465462451090')).toBe('331.13 ИБ');
   });
 
   test('convertFileToBase64', async () => {

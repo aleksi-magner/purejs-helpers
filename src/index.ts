@@ -246,6 +246,83 @@ export const currencyMask = (value: number | undefined | null, fraction: number 
   }).format(number);
 };
 
+/**
+ * Окончания слов
+ * @example
+ * wordEndings(17, ['метр', 'метра', 'метров']); // '17 метров'
+ */
+export const wordEndings = (amount: number | string, titles: [string, string, string]): string => {
+  const number: number = Number.parseFloat(String(amount || 0));
+  const formatNumber: string = new Intl.NumberFormat('ru-RU').format(number);
+
+  let word;
+
+  // RU
+  if (number % 10 === 1 && number % 100 !== 11) {
+    word = titles.at(0);
+  } else if (number % 10 >= 2 && number % 10 <= 4 && (number % 100 < 10 || number % 100 >= 20)) {
+    word = titles.at(1);
+  } else {
+    word = titles.at(2);
+  }
+
+  return [formatNumber, word].join(' ');
+};
+
+/**
+ * Преобразование числа в расстояние
+ * @example
+ * distanceFormat(42); // '42 метра'
+ * distanceFormat(42, true); // '42 м'
+ * distanceFormat(1042); // '1.42 км'
+ */
+export const distanceFormat = (distance: number | string, short: boolean = false): string => {
+  const type: string = getType(distance);
+
+  const validType: boolean = ['Number', 'String'].some(
+    (allowed: string): boolean => allowed === type,
+  );
+
+  if (!distance || !validType) {
+    return '';
+  }
+
+  const validDistance: number = Number.parseFloat(String(distance));
+
+  if (validDistance > 900) {
+    return `${Math.round((validDistance / 1000) * 10) / 10} км`;
+  } else if (short) {
+    return `${new Intl.NumberFormat(locale).format(validDistance)} м`;
+  }
+
+  return wordEndings(validDistance, ['метр', 'метра', 'метров']);
+};
+
+/**
+ * Получение преобразованного размера файла
+ * @example
+ * bytesToSize(40031); // '39.09 кБ'
+ */
+export const bytesToSize = (bytes: number): string => {
+  const invalid: boolean = [!bytes, getType(bytes) !== 'Number'].some(Boolean);
+
+  if (invalid) {
+    return '0 байт';
+  }
+
+  const kiloByte = 1024;
+  const unit: string[] = ['байт', 'кБ', 'МБ', 'ГБ', 'ТБ', 'ПБ', 'ЭБ', 'ЗБ', 'ИБ'];
+
+  if (bytes < kiloByte) {
+    return wordEndings(bytes, ['байт', 'байта', 'байт']);
+  }
+
+  const sizeIndex: number = Math.floor(Math.log(bytes) / Math.log(kiloByte));
+  const size: number = Math.round((bytes / kiloByte ** sizeIndex) * 100) / 100;
+
+  return [size, unit.at(sizeIndex)].join(' ');
+};
+
 /** Проверка объекта даты на валидность */
 export const dateIsValid = (date?: Date): boolean => {
   if (!date) {
@@ -448,7 +525,7 @@ export const dateToHoursMinutes = (date: Date, timeZone: string = 'Europe/Moscow
  * @example
  * minutesToHoursMinutes(480); // '08:00'
  */
-export const minutesToHoursMinutes = (value: number): string => {
+export const minutesToHoursMinutes = (value: number, byParts: boolean = false): string => {
   const type: string = getType(value);
   const invalid: boolean = !value || type !== 'Number';
   const number: number = invalid ? 0 : value;
@@ -456,10 +533,22 @@ export const minutesToHoursMinutes = (value: number): string => {
   const absNumber: number = Math.abs(number);
   const sign: string = number < 0 ? '-' : '';
 
-  const hours: string = leadingZero(Math.floor(absNumber / 60));
-  const minutes: string = leadingZero(absNumber % 60);
+  const hours: number = Math.floor(absNumber / 60);
+  const minutes: number = absNumber % 60;
 
-  const time: string = [hours, minutes].join(':');
+  let time;
+
+  if (byParts) {
+    if (hours && minutes) {
+      time = `${hours} ч. ${minutes} мин.`;
+    } else if (hours) {
+      time = wordEndings(hours, ['час', 'часа', 'часов']);
+    } else {
+      time = wordEndings(minutes, ['минута', 'минуты', 'минут']);
+    }
+  } else {
+    time = [leadingZero(hours), leadingZero(minutes)].join(':');
+  }
 
   return [sign, time].join('');
 };
@@ -679,83 +768,6 @@ export const maskIt: Readonly<MaskMethods> = Object.freeze({
     return regExp.test(formatValue);
   },
 });
-
-/**
- * Окончания слов
- * @example
- * wordEndings(17, ['метр', 'метра', 'метров']); // '17 метров'
- */
-export const wordEndings = (amount: number | string, titles: [string, string, string]): string => {
-  const number: number = Number.parseFloat(String(amount || 0));
-  const formatNumber: string = new Intl.NumberFormat('ru-RU').format(number);
-
-  let word;
-
-  // RU
-  if (number % 10 === 1 && number % 100 !== 11) {
-    word = titles.at(0);
-  } else if (number % 10 >= 2 && number % 10 <= 4 && (number % 100 < 10 || number % 100 >= 20)) {
-    word = titles.at(1);
-  } else {
-    word = titles.at(2);
-  }
-
-  return [formatNumber, word].join(' ');
-};
-
-/**
- * Преобразование числа в расстояние
- * @example
- * distanceFormat(42); // '42 метра'
- * distanceFormat(42, true); // '42 м'
- * distanceFormat(1042); // '1.42 км'
- */
-export const distanceFormat = (distance: number | string, short: boolean = false): string => {
-  const type: string = getType(distance);
-
-  const validType: boolean = ['Number', 'String'].some(
-    (allowed: string): boolean => allowed === type,
-  );
-
-  if (!distance || !validType) {
-    return '';
-  }
-
-  const validDistance: number = Number.parseFloat(String(distance));
-
-  if (validDistance > 900) {
-    return `${Math.round((validDistance / 1000) * 10) / 10} км`;
-  } else if (short) {
-    return `${new Intl.NumberFormat(locale).format(validDistance)} м`;
-  }
-
-  return wordEndings(validDistance, ['метр', 'метра', 'метров']);
-};
-
-/**
- * Получение преобразованного размера файла
- * @example
- * bytesToSize(40031); // '39.09 кБ'
- */
-export const bytesToSize = (bytes: number): string => {
-  const invalid: boolean = [!bytes, getType(bytes) !== 'Number'].some(Boolean);
-
-  if (invalid) {
-    return '0 байт';
-  }
-
-  const kiloByte = 1024;
-  const unit: string[] = ['байт', 'кБ', 'МБ', 'ГБ', 'ТБ', 'ПБ', 'ЭБ', 'ЗБ', 'ИБ'];
-
-  if (bytes < kiloByte) {
-    return wordEndings(bytes, ['байт', 'байта', 'байт']);
-  }
-
-  const sizeIndex: number = Math.floor(Math.log(bytes) / Math.log(kiloByte));
-  const size: number = Math.round((bytes / kiloByte ** sizeIndex) * 100) / 100;
-
-  return [size, unit.at(sizeIndex)].join(' ');
-};
 
 /** Преобразование файла в Base64 */
 export const convertFileToBase64 = (file: File): Promise<string> => {

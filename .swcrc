@@ -2,7 +2,7 @@
   "module": {
     "type": "commonjs"
   },
-  "isModule": "unknown"
+  "isModule": "unknown",
   "minify": true,
   "jsc": {
     "target": "es2018",
