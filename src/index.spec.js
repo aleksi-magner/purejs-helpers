@@ -216,87 +216,308 @@ describe('helpers', () => {
     window.location.assign('about:blank');
   });
 
-  test('getType', () => {
-    expect(getType()).toBe('Undefined');
-    expect(getType('')).toBe('String');
-    expect(getType(null)).toBe('Null');
-    expect(getType(undefined)).toBe('Undefined');
-    expect(getType('string')).toBe('String');
-    expect(getType(42)).toBe('Number');
-    expect(getType(42.13)).toBe('Number');
-    expect(getType([])).toBe('Array');
-    expect(getType({})).toBe('Object');
-    expect(getType(new Date())).toBe('Date');
-    expect(getType(() => {})).toBe('Function');
-    expect(getType(function () {})).toBe('Function');
-    expect(getType(Promise.resolve())).toBe('Promise');
-    expect(getType(new Proxy({}, {}))).toBe('Object');
-    expect(getType(new Event('any'))).toBe('Event');
+  const getTypeCases = [
+    {
+      param: undefined,
+      expected: 'Undefined',
+    },
+    {
+      param: null,
+      expected: 'Null',
+    },
+    {
+      param: '',
+      expected: 'String',
+    },
+    {
+      param: 'string',
+      expected: 'String',
+    },
+    {
+      param: 42,
+      expected: 'Number',
+    },
+    {
+      param: 42.13,
+      expected: 'Number',
+    },
+    {
+      param: [],
+      expected: 'Array',
+    },
+    {
+      param: {},
+      expected: 'Object',
+    },
+    {
+      param: new Date(),
+      expected: 'Date',
+    },
+    {
+      param: () => {},
+      expected: 'Function',
+    },
+    {
+      param: function () {},
+      expected: 'Function',
+    },
+    {
+      param: Promise.resolve(),
+      expected: 'Promise',
+    },
+    {
+      param: new Proxy({}, {}),
+      expected: 'Object',
+    },
+    {
+      param: new Event('any'),
+      expected: 'Event',
+    },
+  ];
+
+  test.each(getTypeCases)('getType', payload => {
+    const { param, expected } = payload;
+
+    expect(getType(param)).toBe(expected);
   });
 
-  test('leadingZero', () => {
-    expect(leadingZero(9)).toBe('09');
-    expect(leadingZero(42)).toBe('42');
-    expect(leadingZero(null)).toBe('00');
-    expect(leadingZero(undefined)).toBe('00');
-    expect(leadingZero('')).toBe('00');
+  const leadingZeroCases = [
+    {
+      param: undefined,
+      expected: '00',
+    },
+    {
+      param: null,
+      expected: '00',
+    },
+    {
+      param: '',
+      expected: '00',
+    },
+    {
+      param: 9,
+      expected: '09',
+    },
+    {
+      param: 42,
+      expected: '42',
+    },
+  ];
+
+  test.each(leadingZeroCases)('leadingZero', payload => {
+    const { param, expected } = payload;
+
+    expect(leadingZero(param)).toBe(expected);
   });
 
-  test('currencyMask', () => {
-    expect(currencyMask(1840)).toBe('1 840 ₽');
-    expect(currencyMask(1840.57)).toBe('1 840,6 ₽');
-    expect(currencyMask(1840.54, 2)).toBe('1 840,54 ₽');
-    expect(currencyMask(null)).toBe('0 ₽');
-    expect(currencyMask(undefined)).toBe('0 ₽');
-    expect(currencyMask(0)).toBe('0 ₽');
+  describe('Check currencyMask', () => {
+    const currencyMaskCases = [
+      {
+        params: [undefined],
+        expected: '0 ₽',
+      },
+      {
+        params: [null],
+        expected: '0 ₽',
+      },
+      {
+        params: [0],
+        expected: '0 ₽',
+      },
+      {
+        params: [1840],
+        expected: '1 840 ₽',
+      },
+      {
+        params: [1840.57],
+        expected: '1 840,6 ₽',
+      },
+      {
+        params: [1840.54, 2],
+        expected: '1 840,54 ₽',
+      },
+    ];
 
-    window.location.assign('https://test.verme.kz/');
+    test.each(currencyMaskCases)('RU server', payload => {
+      const { params, expected } = payload;
 
-    expect(currencyMask(1840)).toBe('1 840 ₸');
-    expect(currencyMask(1840.54, 2)).toBe('1 840,54 ₸');
+      expect(currencyMask(...params)).toBe(expected);
+    });
 
-    window.location.assign('about:blank');
+    test('KZ server', () => {
+      window.location.assign('https://test.verme.kz/');
+
+      expect(currencyMask(1840)).toBe('1 840 ₸');
+      expect(currencyMask(1840.54, 2)).toBe('1 840,54 ₸');
+
+      window.location.assign('about:blank');
+    });
   });
 
-  test('wordEndings', () => {
-    expect(wordEndings(0, ['метр', 'метра', 'метров'])).toBe('0 метров');
-    expect(wordEndings('0.0', ['метр', 'метра', 'метров'])).toBe('0 метров');
-    expect(wordEndings(17, ['метр', 'метра', 'метров'])).toBe('17 метров');
-    expect(wordEndings('1', ['метр', 'метра', 'метров'])).toBe('1 метр');
+  const wordEndingsMaskCases = [
+    {
+      params: [0, ['метр', 'метра', 'метров']],
+      expected: '0 метров',
+    },
+    {
+      params: ['0.0', ['метр', 'метра', 'метров']],
+      expected: '0 метров',
+    },
+    {
+      params: [17, ['метр', 'метра', 'метров']],
+      expected: '17 метров',
+    },
+    {
+      params: ['1', ['метр', 'метра', 'метров']],
+      expected: '1 метр',
+    },
+  ];
+
+  test.each(wordEndingsMaskCases)('wordEndings', payload => {
+    const { params, expected } = payload;
+
+    expect(wordEndings(...params)).toBe(expected);
   });
 
-  test('distanceFormat', () => {
-    expect(distanceFormat(42)).toBe('42 метра');
-    expect(distanceFormat(1042)).toBe('1 км');
-    expect(distanceFormat(1420)).toBe('1.4 км');
-    expect(distanceFormat(42, true)).toBe('42 м');
-    expect(distanceFormat('420', !!{})).toBe('420 м');
-    expect(distanceFormat(null)).toBe('');
-    expect(distanceFormat(undefined)).toBe('');
-    expect(distanceFormat('')).toBe('');
+  const distanceFormatCases = [
+    {
+      params: [undefined],
+      expected: '',
+    },
+    {
+      params: [null],
+      expected: '',
+    },
+    {
+      params: [''],
+      expected: '',
+    },
+    {
+      params: [42],
+      expected: '42 метра',
+    },
+    {
+      params: [42, true],
+      expected: '42 м',
+    },
+    {
+      params: ['420', !!{}],
+      expected:'420 м',
+    },
+    {
+      params: [1042],
+      expected: '1 км',
+    },
+    {
+      params: [1420],
+      expected: '1.4 км',
+    },
+  ];
+
+  test.each(distanceFormatCases)('distanceFormat', payload => {
+    const { params, expected } = payload;
+
+    expect(distanceFormat(...params)).toBe(expected);
   });
 
-  test('bytesToSize', () => {
-    expect(bytesToSize(0)).toBe('0 байт');
-    expect(bytesToSize(1000)).toBe('1 000 байт');
-    expect(bytesToSize(40031)).toBe('39.09 кБ');
-    expect(bytesToSize(40031456)).toBe('38.18 МБ');
-    expect(bytesToSize(40314564546)).toBe('37.55 ГБ');
-    expect(bytesToSize(4003145646546)).toBe('3.64 ТБ');
-    expect(bytesToSize(4003147895276546)).toBe('3.56 ПБ');
-    expect(bytesToSize(+'40031478952795646546')).toBe('34.72 ЭБ');
-    expect(bytesToSize(+'4003147895279564654656')).toBe('3.39 ЗБ');
-    expect(bytesToSize(+'400314789527956465462451090')).toBe('331.13 ИБ');
+  const bytesToSizeCases = [
+    {
+      param: 0,
+      expected: '0 байт',
+    },
+    {
+      param: 1000,
+      expected: '1 000 байт',
+    },
+    {
+      param: 40031,
+      expected: '39.09 кБ',
+    },
+    {
+      param: 40031456,
+      expected: '38.18 МБ',
+    },
+    {
+      param: 40314564546,
+      expected: '37.55 ГБ',
+    },
+    {
+      param: 4003145646546,
+      expected: '3.64 ТБ',
+    },
+    {
+      param: 4003147895276546,
+      expected: '3.56 ПБ',
+    },
+    {
+      param: +'40031478952795646546',
+      expected: '34.72 ЭБ',
+    },
+    {
+      param: +'4003147895279564654656',
+      expected: '3.39 ЗБ',
+    },
+    {
+      param: +'400314789527956465462451090',
+      expected: '331.13 ИБ',
+    },
+  ];
+
+  test.each(bytesToSizeCases)('bytesToSize', payload => {
+    const { param, expected } = payload;
+
+    expect(bytesToSize(param)).toBe(expected);
   });
 
-  test('dateIsValid', () => {
-    expect(dateIsValid()).toBe(false);
-    expect(dateIsValid(new Date('22.04.2026T21:06:06+05:00'))).toBe(false);
-    expect(dateIsValid(new Date('2022-32-33'))).toBe(false);
-    expect(dateIsValid(new Date('2022-02-23'))).toBe(true);
+  const dateIsValidCases = [
+    {
+      param: undefined,
+      expected: false,
+    },
+    {
+      param: new Date('22.04.2026T21:06:06+05:00'),
+      expected: false,
+    },
+    {
+      param: new Date('2022-32-33'),
+      expected: false,
+    },
+    {
+      param: new Date('2022-02-23'),
+      expected: true,
+    },
+  ];
+
+  test.each(dateIsValidCases)('dateIsValid', payload => {
+    const { param, expected } = payload;
+
+    expect(dateIsValid(param)).toBe(expected);
   });
 
-  test('toISODate', () => {
+  const toISODateCases = [
+    {
+      param: undefined,
+      expected: '',
+    },
+    {
+      param: null,
+      expected: '',
+    },
+    {
+      param: new Date('2022-32-33'),
+      expected: '',
+    },
+    {
+      param: new Date('2022-04-26T21:06:06.405296+03:00'),
+      expected: '2022-04-26',
+    },
+    {
+      param: new Date('2022-04-26T21:06:06+05:00'),
+      expected: '2022-04-26',
+    },
+  ];
+
+  test.each(toISODateCases)('toISODate', payload => {
     const { DateTimeFormat } = window.Intl;
 
     const dateTimeFormat = vi.spyOn(window.Intl, 'DateTimeFormat');
@@ -309,119 +530,259 @@ describe('helpers', () => {
         }),
     );
 
-    expect(toISODate(new Date('2022-04-26T21:06:06.405296+03:00'))).toBe('2022-04-26');
-    expect(toISODate(new Date('2022-04-26T21:06:06+05:00'))).toBe('2022-04-26');
-    expect(toISODate(new Date('2022-32-33'))).toBe('');
-    expect(toISODate(null)).toBe('');
-    expect(toISODate(undefined)).toBe('');
+    const { param, expected } = payload;
+
+    expect(toISODate(param)).toBe(expected);
+
+    window.Intl.DateTimeFormat = DateTimeFormat;
   });
 
-  test('dateToDateShort', () => {
-    expect(dateToDateShort(new Date('2022-04-26T21:06:06.405296+03:00'))).toBe('26.04.2022');
-    expect(dateToDateShort(new Date('2022-04-26T21:06:06+05:00'))).toBe('26.04.2022');
+  describe('Check dateToDateShort', () => {
+    const dateToDateShortCases = [
+      {
+        params: [undefined],
+        expected: '',
+      },
+      {
+        params: [null],
+        expected: '',
+      },
+      {
+        params: [new Date('2022-32-33')],
+        expected: '',
+      },
+      {
+        params: [new Date('2022-04-26T21:06:06.405296+03:00')],
+        expected: '26.04.2022',
+      },
+      {
+        params: [new Date('2022-04-26T21:06:06+05:00')],
+        expected: '26.04.2022',
+      },
+      {
+        params: [new Date('2022-04-26T21:06:06+05:00'), 'Europe/Ulyanovsk'],
+        expected: '26.04.2022',
+      },
+    ];
 
-    expect(dateToDateShort(new Date('2022-04-26T21:06:06+05:00'), 'Europe/Ulyanovsk')).toBe(
-      '26.04.2022',
-    );
+    test.each(dateToDateShortCases)('Convert to Moscow timezone', payload => {
+      const { params, expected } = payload;
 
-    expect(dateToDateShort(new Date('2022-04-26T21:06:06+05:00'), '')).toBeDefined();
+      expect(dateToDateShort(...params)).toBe(expected);
+    });
 
-    expect(dateToDateShort(new Date('2022-32-33'))).toBe('');
-    expect(dateToDateShort(null)).toBe('');
-    expect(dateToDateShort(undefined)).toBe('');
+    test('Convert to local timezone', () => {
+      expect(dateToDateShort(new Date('2022-04-26T21:06:06+05:00'), '')).toBeDefined();
+    });
   });
 
-  test('ISOToDateFormat', () => {
-    expect(ISOToDateFormat('2022-04-26')).toBe('26.04.2022');
-    expect(ISOToDateFormat('2022-04-26T21:06:06+05:00')).toBe('');
-    expect(ISOToDateFormat(null)).toBe('');
-    expect(ISOToDateFormat(undefined)).toBe('');
-    expect(ISOToDateFormat('')).toBe('');
+  const ISOToDateFormatCases = [
+    {
+      param: undefined,
+      expected: '',
+    },
+    {
+      param: null,
+      expected: '',
+    },
+    {
+      param: '',
+      expected: '',
+    },
+    {
+      param: 42,
+      expected: '',
+    },
+    {
+      param: '2022-04-26',
+      expected: '26.04.2022',
+    },
+    {
+      param: '2022-04-26T21:06:06+05:00',
+      expected: '',
+    },
+  ];
+
+  test.each(ISOToDateFormatCases)('ISOToDateFormat', payload => {
+    const { param, expected } = payload;
+
+    expect(ISOToDateFormat(param)).toBe(expected);
   });
 
-  test('dateTime', () => {
-    expect(dateTime(new Date('2022-04-26T21:06:06.405296+03:00'))).toBe('26.04.2022, 21:06');
-    expect(dateTime(new Date('2022-04-26T21:06:06+05:00'))).toBe('26.04.2022, 19:06');
+  describe('Check dateTime', () => {
+    const dateTimeCases = [
+      {
+        params: [undefined],
+        expected: '',
+      },
+      {
+        params: [null],
+        expected: '',
+      },
+      {
+        params: [''],
+        expected: '',
+      },
+      {
+        params: [new Date('2022-04-26T21:06:06.405296+03:00')],
+        expected: '26.04.2022, 21:06',
+      },
+      {
+        params: [new Date('2022-04-26T21:06:06+05:00')],
+        expected: '26.04.2022, 19:06',
+      },
+      {
+        params: [new Date('2022-04-26T21:06:06+05:00'), 'Europe/Ulyanovsk'],
+        expected: '26.04.2022, 20:06',
+      },
+    ];
 
-    expect(dateTime(new Date('2022-04-26T21:06:06+05:00'), 'Europe/Ulyanovsk')).toBe(
-      '26.04.2022, 20:06',
-    );
+    test.each(dateTimeCases)('Convert to Moscow timezone', payload => {
+      const { params, expected } = payload;
 
-    expect(dateTime(new Date('2022-04-26T21:06:06+05:00'), '')).toBeDefined();
-    expect(dateTime(null)).toBe('');
-    expect(dateTime(undefined)).toBe('');
+      expect(dateTime(...params)).toBe(expected);
+    });
+
+    test('Convert to local timezone', () => {
+      expect(dateTime(new Date('2022-04-26T21:06:06+05:00'), '')).toBeDefined();
+    });
   });
 
-  test('dateToDateLong', () => {
-    const payload = {
-      date: new Date('2022-04-26T21:06:06+05:00'),
-      showWeekDay: undefined,
-      showYear: undefined,
-      timeZone: undefined,
-    };
+  describe('Check dateToDateLong', () => {
+    const dateToDateLongCases = [
+      {
+        param: {
+          date: new Date('2022-04-26T21:06:06+05:00'),
+        },
+        expected: '26 апреля 2022',
+      },
+      {
+        param: {
+          date: new Date('2022-04-27T01:06:06+05:00'),
+        },
+        expected: '26 апреля 2022',
+      },
+      {
+        param: {
+          date: new Date('2022-04-27T01:06:06+05:00'),
+          showWeekDay: false,
+          showYear: true,
+          timeZone: 'Europe/Ulyanovsk',
+        },
+        expected: '27 апреля 2022',
+      },
+      {
+        param: {
+          date: new Date('2022-04-27T01:06:06+05:00'),
+          showWeekDay: false,
+          showYear: false,
+          timeZone: 'Europe/Ulyanovsk',
+        },
+        expected: '27 апреля',
+      },
+      {
+        param: {
+          date: new Date('2022-04-26T21:06:06.405296+03:00'),
+          showWeekDay: true,
+          showYear: true,
+          timeZone: 'Europe/Ulyanovsk',
+        },
+        expected: 'вт, 26 апреля 2022',
+      },
+      {
+        param: {
+          date: new Date('2022-04-26'),
+          showWeekDay: true,
+          showYear: false,
+          timeZone: 'Europe/Ulyanovsk',
+        },
+        expected: 'вт, 26 апреля',
+      },
+      {
+        param: {
+          date: new Date('2022-32-33'),
+          showWeekDay: false,
+          showYear: true,
+          timeZone: '',
+        },
+        expected: '',
+      },
+      {
+        param: {
+          date: null,
+          showWeekDay: false,
+          showYear: true,
+          timeZone: '',
+        },
+        expected: '',
+      },
+      {
+        param: {
+          showWeekDay: false,
+          showYear: true,
+          timeZone: '',
+        },
+        expected: '',
+      },
+      {
+        param: {},
+        expected: '',
+      },
+    ];
 
-    expect(dateToDateLong(payload)).toBe('26 апреля 2022');
+    test.each(dateToDateLongCases)('Convert to Moscow timezone', payload => {
+      const { param, expected } = payload;
 
-    payload.date = new Date('2022-04-27T01:06:06+05:00');
+      expect(dateToDateLong(param)).toBe(expected);
+    });
 
-    expect(dateToDateLong(payload)).toBe('26 апреля 2022');
-
-    payload.showWeekDay = false;
-    payload.showYear = true;
-    payload.timeZone = 'Europe/Ulyanovsk';
-
-    expect(dateToDateLong(payload)).toBe('27 апреля 2022');
-
-    payload.showYear = false;
-
-    expect(dateToDateLong(payload)).toBe('27 апреля');
-
-    payload.date = new Date('2022-04-26T21:06:06.405296+03:00');
-    payload.showWeekDay = true;
-    payload.showYear = true;
-
-    expect(dateToDateLong(payload)).toBe('вт, 26 апреля 2022');
-
-    payload.date = new Date('2022-04-26');
-    payload.showWeekDay = true;
-    payload.showYear = false;
-
-    expect(dateToDateLong(payload)).toBe('вт, 26 апреля');
-
-    payload.showWeekDay = false;
-    payload.showYear = true;
-    payload.timeZone = '';
-
-    expect(dateToDateLong(payload)).toBeDefined();
-
-    payload.date = new Date('2022-32-33');
-
-    expect(dateToDateLong(payload)).toBe('');
-
-    payload.date = null;
-
-    expect(dateToDateLong(payload)).toBe('');
-
-    payload.date = undefined;
-
-    expect(dateToDateLong(payload)).toBe('');
-
-    expect(dateToDateLong()).toBe('');
+    test('Convert to local timezone', () => {
+      expect(dateToDateLong({
+        date: new Date('2022-04-26'),
+        showWeekDay: false,
+        showYear: true,
+        timeZone: '',
+      })).toBeDefined();
+    });
   });
 
-  test('dateToHoursMinutes', () => {
-    expect(dateToHoursMinutes(new Date('2022-04-26T21:06:06.405296+03:00'))).toBe('21:06');
-    expect(dateToHoursMinutes(new Date('2022-04-26T21:06:06+05:00'))).toBe('19:06');
+  describe('Check dateToHoursMinutes', () => {
+    const dateToHoursMinutesCases = [
+      {
+        params: [undefined],
+        expected: '00:00',
+      },
+      {
+        params: [null],
+        expected: '00:00',
+      },
+      {
+        params: [new Date('2022-32-33')],
+        expected: '00:00',
+      },
+      {
+        params: [new Date('2022-04-26T21:06:06.405296+03:00')],
+        expected: '21:06',
+      },
+      {
+        params: [new Date('2022-04-26T21:06:06+05:00')],
+        expected: '19:06',
+      },
+      {
+        params: [new Date('2022-04-26T21:06:06+05:00'), 'Europe/Ulyanovsk'],
+        expected: '20:06',
+      },
+    ];
 
-    expect(dateToHoursMinutes(new Date('2022-04-26T21:06:06+05:00'), 'Europe/Ulyanovsk')).toBe(
-      '20:06',
-    );
+    test.each(dateToHoursMinutesCases)('Convert to Moscow timezone', payload => {
+      const { params, expected } = payload;
 
-    expect(dateToHoursMinutes(new Date('2022-04-26T21:06:06+05:00'), '')).not.toBe('00:00');
+      expect(dateToHoursMinutes(...params)).toBe(expected);
+    });
 
-    expect(dateToHoursMinutes(new Date('2022-32-33'))).toBe('00:00');
-    expect(dateToHoursMinutes(null)).toBe('00:00');
-    expect(dateToHoursMinutes(undefined)).toBe('00:00');
+    test('Convert to local timezone', () => {
+      expect(dateToHoursMinutes(new Date('2022-04-26T21:06:06+05:00'), '')).not.toBe('00:00');
+    });
   });
 
   const minutesToHoursMinutesCases = [
@@ -469,47 +830,103 @@ describe('helpers', () => {
     expect(minutesToHoursMinutes(minutes, true)).toBe(byParts);
   });
 
-  test('getMoscowTime', () => {
-    expect(getMoscowTime('2022-05-01T09:30:00Z')).toEqual({
-      hour: '12',
-      minute: '30',
-      timestamp: 1651397400000,
+  const getMoscowTimeCases = [
+    {
+      param: '2022-05-01T09:30:00Z',
+      expected: {
+        hour: '12',
+        minute: '30',
+        timestamp: 1651397400000,
+      },
+    },
+    {
+      param: '2022-04-26T01:06:06+03:00',
+      expected: {
+        hour: '01',
+        minute: '06',
+        timestamp: 1650924366000,
+      },
+    },
+    {
+      param: '2022-05-01',
+      expected: {
+        hour: '03',
+        minute: '00',
+        timestamp: 1651363200000,
+      },
+    },
+    {
+      param: null,
+      expected: {
+        hour: '00',
+        minute: '00',
+        timestamp: 0,
+      },
+    },
+  ];
+
+  test.each(getMoscowTimeCases)('getMoscowTime', payload => {
+    const { param, expected } = payload;
+
+    expect(getMoscowTime(param)).toEqual(expected);
+  });
+
+  describe('Check weekOfYear', () => {
+    const weekOfYearCases = [
+      {
+        param: null,
+        expected: 0,
+      },
+      {
+        param: new Date('2022-04-26T21:06:06+03:00'),
+        expected: 17,
+      },
+      {
+        param: new Date('2021-10-21T21:06:06+05:00'),
+        expected: 42,
+      },
+      {
+        param: new Date('2020-10-21T01:06:06+05:00'),
+        expected: 43,
+      },
+    ];
+
+    test.each(weekOfYearCases)('Week of year by date', payload => {
+      const { param, expected } = payload;
+
+      expect(weekOfYear(param)).toBe(expected);
     });
 
-    expect(getMoscowTime('2022-04-26T01:06:06+03:00')).toEqual({
-      hour: '01',
-      minute: '06',
-      timestamp: 1650924366000,
-    });
-
-    expect(getMoscowTime('2022-05-01')).toEqual({
-      hour: '03',
-      minute: '00',
-      timestamp: 1651363200000,
-    });
-
-    expect(getMoscowTime(null)).toEqual({
-      hour: '00',
-      minute: '00',
-      timestamp: 0,
+    test('Current week of year', () => {
+      expect(weekOfYear()).toBeGreaterThan(0);
     });
   });
 
-  test('weekOfYear', () => {
-    expect(weekOfYear(new Date('2022-04-26T21:06:06+03:00'))).toBe(17);
-    expect(weekOfYear(new Date('2021-10-21T21:06:06+05:00'))).toBe(42);
-    expect(weekOfYear(new Date('2020-10-21T01:06:06+05:00'))).toBe(43);
+  describe('Check weekNumberToDate', () => {
+    const weekNumberToDateCases = [
+      {
+        params: [2022, 17],
+        expected: new Date('2022-04-24T21:00:00.000Z'),
+      },
+      {
+        params: [2021, 42],
+        expected: new Date('2021-10-17T21:00:00.000Z'),
+      },
+      {
+        params: [2020, 43],
+        expected: new Date('2020-10-18T21:00:00.000Z'),
+      },
+    ];
 
-    expect(weekOfYear()).toBeGreaterThan(0);
-    expect(weekOfYear(null)).toBe(0);
-  });
+    test.each(weekNumberToDateCases)('Date by week number', payload => {
+      const { params, expected } = payload;
 
-  test('weekNumberToDate', () => {
-    expect(weekNumberToDate(2022, 17)).toStrictEqual(new Date('2022-04-24T21:00:00.000Z'));
-    expect(weekNumberToDate(2021, 42)).toStrictEqual(new Date('2021-10-17T21:00:00.000Z'));
-    expect(weekNumberToDate(2020, 43)).toStrictEqual(new Date('2020-10-18T21:00:00.000Z'));
+      expect(weekNumberToDate(...params)).toStrictEqual(expected);
+    });
 
-    expect(weekNumberToDate(42, undefined)).toBeInstanceOf(Date);
+    test('Random date by week number', () => {
+      expect(weekNumberToDate(42, undefined)).toBeInstanceOf(Date);
+    });
   });
 
   const maskCases = [
@@ -831,81 +1248,137 @@ describe('helpers', () => {
     expect(emptyFile).toBe('');
   });
 
-  test('shortName', () => {
-    expect(shortName('Светлова Александра Андреевна')).toBe('СвеАА');
-    expect(shortName('Бекр Фуркад')).toBe('БекрФ');
-    expect(shortName('василий')).toBe('Васил');
-    expect(shortName('42')).toBe('――');
-    expect(shortName('')).toBe('――');
-    expect(shortName(null)).toBe('――');
-    expect(shortName(undefined)).toBe('――');
+  const shortNameCases = [
+    {
+      param: undefined,
+      expected: '――',
+    },
+    {
+      param: null,
+      expected: '――',
+    },
+    {
+      param: '',
+      expected: '――',
+    },
+    {
+      param: '42',
+      expected: '――',
+    },
+    {
+      param: 'Светлова Александра Андреевна',
+      expected: 'СвеАА',
+    },
+    {
+      param: 'Бекр Фуркад',
+      expected: 'БекрФ',
+    },
+    {
+      param: 'василий',
+      expected: 'Васил',
+    },
+  ];
+
+  test.each(shortNameCases)('shortName', payload => {
+    const { param, expected } = payload;
+
+    expect(shortName(param)).toBe(expected);
   });
 
-  test('removeObjectKeys', () => {
-    expect(removeObjectKeys(null, null)).toEqual({});
-    expect(removeObjectKeys([], null)).toEqual({});
-    expect(removeObjectKeys(['a'], null)).toEqual({});
-    expect(removeObjectKeys(['a'], {})).toEqual({});
-    expect(removeObjectKeys(['a'], { b: 42 })).toEqual({ b: 42 });
-
-    expect(
-      removeObjectKeys(['a'], {
+  const removeObjectKeysCases = [
+    {
+      params: [null, null],
+      expected: {},
+    },
+    {
+      params: [[], null],
+      expected: {},
+    },
+    {
+      params: [['a'], null],
+      expected: {},
+    },
+    {
+      params: [['a'], {}],
+      expected: {},
+    },
+    {
+      params: [['a'], { b: 42 }],
+      expected: { b: 42 },
+    },
+    {
+      params: [
+        ['a'],
+        {
+          a: 'need remove',
+          b: 42,
+        }
+      ],
+      expected: { b: 42 },
+    },
+    {
+      params: [
+        [],
+        {
+          a: 'need remove',
+          b: 42,
+        }
+      ],
+      expected: {
         a: 'need remove',
         b: 42,
-      }),
-    ).toEqual({ b: 42 });
+      },
+    },
+  ];
 
-    expect(
-      removeObjectKeys([], {
-        a: 'need remove',
-        b: 42,
-      }),
-    ).toEqual({
-      a: 'need remove',
-      b: 42,
-    });
+  test.each(removeObjectKeysCases)('removeObjectKeys', payload => {
+    const { params, expected } = payload;
+
+    expect(removeObjectKeys(...params)).toEqual(expected);
   });
 
-  test('deepClone', () => {
-    const sourceObject = {
-      foo: 'bar',
-      obj: { a: 1, b: 2 },
-      array: [{ id: 1, text: 42 }, 'string'],
-      any: undefined,
-      number: 0,
-      date: new Date('2023-03-20'),
-    };
+  describe('Check deepClone', () => {
+    test('Object', () => {
+      const sourceObject = {
+        foo: 'bar',
+        obj: { a: 1, b: 2 },
+        array: [{ id: 1, text: 42 }, 'string'],
+        any: undefined,
+        number: 0,
+        date: new Date('2023-03-20'),
+      };
 
-    const clonedObject = deepClone(sourceObject);
+      const clonedObject = deepClone(sourceObject);
 
-    clonedObject.obj.a = 4;
-    clonedObject.array[0].id = 4;
-    clonedObject.date.setFullYear(3000);
+      clonedObject.obj.a = 4;
+      clonedObject.array[0].id = 4;
+      clonedObject.date.setFullYear(3000);
 
-    expect(sourceObject).not.toEqual(clonedObject);
+      expect(sourceObject).not.toEqual(clonedObject);
 
-    expect(clonedObject).toEqual({
-      foo: 'bar',
-      obj: { a: 4, b: 2 },
-      array: [{ id: 4, text: 42 }, 'string'],
-      any: undefined,
-      number: 0,
-      date: new Date('3000-03-20'),
+      expect(clonedObject).toEqual({
+        foo: 'bar',
+        obj: { a: 4, b: 2 },
+        array: [{ id: 4, text: 42 }, 'string'],
+        any: undefined,
+        number: 0,
+        date: new Date('3000-03-20'),
+      });
     });
 
-    const sourceArray = [{ id: 1, text: 42 }, 'string'];
-    const clonedArray = deepClone(sourceArray);
+    test('Array', () => {
+      const sourceArray = [{ id: 1, text: 42 }, 'string'];
+      const clonedArray = deepClone(sourceArray);
 
-    clonedArray[0].id = 7;
+      clonedArray[0].id = 7;
 
-    expect(sourceArray).not.toEqual(clonedArray);
-    expect(clonedArray).toEqual([{ id: 7, text: 42 }, 'string']);
+      expect(sourceArray).not.toEqual(clonedArray);
+      expect(clonedArray).toEqual([{ id: 7, text: 42 }, 'string']);
+    });
 
-    expect(deepClone(42)).toBe(42);
-    expect(deepClone('string')).toBe('string');
-    expect(deepClone('')).toBe('');
-    expect(deepClone(null)).toBe(null);
-    expect(deepClone(undefined)).toBe(undefined);
+    test.each([undefined, null, '', 'string', 42])('Primitive', param => {
+      expect(deepClone(param)).toBe(param);
+    });
   });
 
   test('memo', () => {
@@ -916,74 +1389,83 @@ describe('helpers', () => {
     expect(memoAdd(42, 24)).toBe(66);
   });
 
-  test('searchByKeys', () => {
-    expect(searchByKeys()).toEqual([]);
-
-    expect(
-      searchByKeys({
-        search: '',
-        options: [],
-        keys: [],
-      }),
-    ).toEqual([]);
-
+  describe('Check searchByKeys', () => {
     const options = [
       {
         text: 'Any text content',
-        sub: {
-          name: 'query',
-        },
+        sub: { name: 'query' },
       },
       {
         text: 'Content',
       },
     ];
 
-    expect(
-      searchByKeys({
-        search: 'any',
-        options,
-        keys: [],
-      }),
-    ).toEqual([]);
-
-    expect(
-      searchByKeys({
-        search: 'any',
-        options,
-        keys: ['text'],
-      }),
-    ).toEqual([
+    const searchByKeysCases = [
       {
-        text: 'Any text content',
-        sub: {
-          name: 'query',
-        },
+        param: undefined,
+        expected: [],
       },
-    ]);
-
-    expect(
-      searchByKeys({
-        search: 'content',
-        options,
-        keys: ['text'],
-      }),
-    ).toEqual(options);
-
-    expect(
-      searchByKeys({
-        search: 'query',
-        options,
-        keys: ['sub.name'],
-      }),
-    ).toEqual([
       {
-        text: 'Any text content',
-        sub: {
-          name: 'query',
+        param: {
+          search: '',
+          options: [],
+          keys: [],
         },
+        expected: [],
       },
-    ]);
+      {
+        param: {
+          search: 'any',
+          options,
+          keys: [],
+        },
+        expected: [],
+      },
+      {
+        param: {
+          search: 'any',
+          options,
+          keys: ['text'],
+        },
+        expected: [
+          {
+            text: 'Any text content',
+            sub: {
+              name: 'query',
+            },
+          },
+        ],
+      },
+      {
+        param: {
+          search: 'content',
+          options,
+          keys: ['text'],
+        },
+        expected: options,
+      },
+      {
+        param: {
+          search: 'query',
+          options,
+          keys: ['sub.name'],
+        },
+        expected: [
+          {
+            text: 'Any text content',
+            sub: {
+              name: 'query',
+            },
+          },
+        ],
+      },
+    ];
+
+    test.each(searchByKeysCases)('searchByKeys', payload => {
+      const { param, expected } = payload;
+
+      expect(searchByKeys(param)).toEqual(expected);
+    });
   });
 
   describe('Check Clipboard', () => {

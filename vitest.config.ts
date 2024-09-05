@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     dir: './src/',
+    cache: false,
     isolate: true,
     passWithNoTests: true,
     bail: 1,
@@ -17,14 +18,20 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       enabled: true,
+      include: ['**/src/**'],
       all: true,
       clean: true,
       cleanOnRerun: true,
       skipFull: false,
-      perFile: false,
       reportOnFailure: false,
-      include: ['**/src/**'],
       reporter: ['text'],
+      thresholds: {
+        perFile: false,
+        statements: 100,
+        branches: 100,
+        functions: 100,
+        lines: 100,
+      },
     },
   },
 });
