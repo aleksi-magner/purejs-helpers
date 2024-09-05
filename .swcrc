@@ -1,19 +1,19 @@
 {
-  "module": {
-    "type": "commonjs"
-  },
-  "isModule": "unknown",
+  "$schema": "https://swc.rs/schema.json",
   "minify": true,
+  "module": {
+    "type": "es6",
+  },
   "jsc": {
-    "target": "es2018",
+    "target": "es2021",
+    "minify": {
+      "compress": false,
+      "mangle": false
+    },
     "parser": {
       "syntax": "typescript",
       "tsx": false
     },
-    "loose": false,
-    "minify": {
-      "compress": false,
-      "mangle": false
-    }
+    "loose": false
   }
 }
