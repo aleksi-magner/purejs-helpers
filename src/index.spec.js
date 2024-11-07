@@ -28,6 +28,7 @@ import {
   removeObjectKeys,
   deepClone,
   memo,
+  fuzzySearch,
   searchByKeys,
   checkClipboardFunctionality,
   getUTMLabels,
@@ -402,7 +403,7 @@ describe('helpers', () => {
     },
     {
       params: ['420', !!{}],
-      expected:'420 м',
+      expected: '420 м',
     },
     {
       params: [1042],
@@ -737,12 +738,14 @@ describe('helpers', () => {
     });
 
     test('Convert to local timezone', () => {
-      expect(dateToDateLong({
-        date: new Date('2022-04-26'),
-        showWeekDay: false,
-        showYear: true,
-        timeZone: '',
-      })).toBeDefined();
+      expect(
+        dateToDateLong({
+          date: new Date('2022-04-26'),
+          showWeekDay: false,
+          showYear: true,
+          timeZone: '',
+        }),
+      ).toBeDefined();
     });
   });
 
@@ -1312,7 +1315,7 @@ describe('helpers', () => {
         {
           a: 'need remove',
           b: 42,
-        }
+        },
       ],
       expected: { b: 42 },
     },
@@ -1322,7 +1325,7 @@ describe('helpers', () => {
         {
           a: 'need remove',
           b: 42,
-        }
+        },
       ],
       expected: {
         a: 'need remove',
@@ -1389,11 +1392,72 @@ describe('helpers', () => {
     expect(memoAdd(42, 24)).toBe(66);
   });
 
+  const fuzzySearchCases = [
+    {
+      query: 'wheelcart',
+      text: 'cart',
+      expected: false,
+    },
+    {
+      query: 'wheelcart',
+      text: 'cartwheel',
+      expected: false,
+    },
+    {
+      query: 'cartwheel',
+      text: 'cartwheel',
+      expected: true,
+    },
+    {
+      query: 'twl',
+      text: 'cartwheel',
+      expected: true,
+    },
+    {
+      query: 'cart',
+      text: 'cartwheel',
+      expected: true,
+    },
+    {
+      query: 'cw',
+      text: 'cartwheel',
+      expected: true,
+    },
+    {
+      query: 'ee',
+      text: 'cartwheel',
+      expected: true,
+    },
+    {
+      query: 'art',
+      text: 'cartwheel',
+      expected: true,
+    },
+    {
+      query: 'eeel',
+      text: 'cartwheel',
+      expected: false,
+    },
+    {
+      query: 'dog',
+      text: 'cartwheel',
+      expected: false,
+    },
+  ];
+
+  test.each(fuzzySearchCases)('fuzzySearch', payload => {
+    const { query, text, expected } = payload;
+
+    expect(fuzzySearch(query, text)).toBe(expected);
+  });
+
   describe('Check searchByKeys', () => {
     const options = [
       {
         text: 'Any text content',
-        sub: { name: 'query' },
+        sub: {
+          name: 'query',
+        },
       },
       {
         text: 'Content',
@@ -1416,7 +1480,7 @@ describe('helpers', () => {
       {
         param: {
           search: 'any',
-          options,
+          options: [...options],
           keys: [],
         },
         expected: [],
@@ -1424,7 +1488,7 @@ describe('helpers', () => {
       {
         param: {
           search: 'any',
-          options,
+          options: [...options],
           keys: ['text'],
         },
         expected: [
@@ -1433,21 +1497,29 @@ describe('helpers', () => {
             sub: {
               name: 'query',
             },
+            match_score: 3,
+            normalized_text: 'anytextcontent',
           },
         ],
       },
       {
         param: {
           search: 'content',
-          options,
+          options: [...options],
           keys: ['text'],
         },
-        expected: options,
+        expected: [
+          {
+            text: 'Content',
+            match_score: 4,
+            normalized_text: 'content',
+          },
+        ],
       },
       {
         param: {
           search: 'query',
-          options,
+          options: [...options],
           keys: ['sub.name'],
         },
         expected: [
@@ -1456,6 +1528,127 @@ describe('helpers', () => {
             sub: {
               name: 'query',
             },
+            match_score: 4,
+            normalized_text: 'anytextcontent',
+            'normalized_sub.name': 'query',
+          },
+        ],
+      },
+      {
+        param: {
+          search: 'Store',
+          options: [
+            {
+              text: 'Any text content',
+              baby: [
+                {
+                  name: 'Store 2',
+                  description: 'Some_description-!@#$%^&*()_+=',
+                },
+              ],
+            },
+            {
+              text: 'Store 1',
+              baby: null,
+              description: 'User description $$$',
+            },
+            {
+              text: 'Any text content',
+              baby: [
+                {
+                  name: 'Place 1',
+                  description: 'Some_description-!@#$%^&*()_+=',
+                },
+              ],
+            },
+          ],
+          childrenField: 'baby',
+          keys: ['text', 'name', 'description'],
+        },
+        expected: [
+          {
+            text: 'Any text content',
+            match_score: 3,
+            normalized_text: 'anytextcontent',
+            normalized_name: '',
+            normalized_description: '',
+            baby: [
+              {
+                name: 'Store 2',
+                description: 'Some_description-!@#$%^&*()_+=',
+                match_score: 3,
+                normalized_text: '',
+                normalized_name: 'store2',
+                normalized_description: 'somedescription',
+              },
+            ],
+          },
+          {
+            text: 'Store 1',
+            description: 'User description $$$',
+            match_score: 3,
+            normalized_text: 'store1',
+            normalized_name: '',
+            normalized_description: 'userdescription',
+            baby: null,
+          },
+        ],
+      },
+      {
+        param: {
+          search: 'onten',
+          options: [...options],
+          keys: ['text'],
+        },
+        expected: [
+          {
+            text: 'Any text content',
+            sub: {
+              name: 'query',
+            },
+            match_score: 2,
+            normalized_text: 'anytextcontent',
+            'normalized_sub.name': 'query',
+          },
+          {
+            text: 'Content',
+            match_score: 2,
+            'normalized_sub.name': '',
+            normalized_text: 'content',
+          },
+        ],
+      },
+      {
+        param: {
+          search: 'conent',
+          options: [...options],
+          keys: ['text'],
+          enableFuzzySearch: false,
+        },
+        expected: [],
+      },
+      {
+        param: {
+          search: 'conent',
+          options: [...options],
+          keys: ['text'],
+          enableFuzzySearch: true,
+        },
+        expected: [
+          {
+            text: 'Any text content',
+            sub: {
+              name: 'query',
+            },
+            match_score: 1,
+            normalized_text: 'anytextcontent',
+            'normalized_sub.name': 'query',
+          },
+          {
+            text: 'Content',
+            match_score: 1,
+            'normalized_sub.name': '',
+            normalized_text: 'content',
           },
         ],
       },

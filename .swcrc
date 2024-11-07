@@ -5,7 +5,7 @@
     "type": "es6",
   },
   "jsc": {
-    "target": "es2021",
+    "target": "es2022",
     "minify": {
       "compress": false,
       "mangle": false

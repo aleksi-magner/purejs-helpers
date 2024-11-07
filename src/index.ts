@@ -20,7 +20,7 @@ export const getEnvironment = (name: string = ''): Environment => {
   const isLocalServer: boolean = Boolean(
     host === 'localhost' ||
       // IPv4 localhost address
-      /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/.test(host),
+      /^127(?:\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)){3}$/.test(host),
   );
 
   const regExp: RegExp = new RegExp(['(?=-).*(?=\\.', name, ')'].join(''));
@@ -102,7 +102,7 @@ export const cookie: Readonly<Cookie> = Object.freeze({
 
       switch (true) {
         case ['Domain', 'Path'].includes(option) && typeof value === 'string': {
-          cookieOptions[<'Domain' | 'Path'>option] = <string>value;
+          cookieOptions[<'Domain' | 'Path'>option] = value;
 
           break;
         }
@@ -117,7 +117,7 @@ export const cookie: Readonly<Cookie> = Object.freeze({
         }
 
         case option === 'Max-Age' && typeof value === 'number': {
-          cookieOptions[<'Max-Age'>option] = <number>value;
+          cookieOptions[<'Max-Age'>option] = value;
 
           delete cookieOptions['Expires'];
 
@@ -866,7 +866,7 @@ export const deepClone = (sourceObject: any): any => {
     return arrayClone;
   }
 
-  const objectClone: Record<string, any> = Object.assign({}, <Record<string, any>>sourceObject);
+  const objectClone: Record<string, any> = { ...sourceObject }; // Object.assign({}, <Record<string, any>>sourceObject);
 
   Object.keys(objectClone).forEach((key: string): void => {
     const value = sourceObject[key];
@@ -909,52 +909,255 @@ export const memo = (callback: Function): Function =>
     },
   });
 
-export type SearchOptions = {
-  search?: string;
-  options?: Record<string, any>[];
-  keys?: string[];
+/**
+ * Нечёткий поиск в строке по поисковой фразе.
+ * @param {string} query - поисковая фраза.
+ * @param {string} text - текст, в котором искать.
+ * @returns {boolean}
+ *
+ * @example
+ * fuzzySearch('twl', 'cartwheel') // true
+ * fuzzySearch('eeel', 'cartwheel') // false
+ */
+export const fuzzySearch = (query: string, text: string): boolean => {
+  const queryLength: number = query.length;
+  const textLength: number = text.length;
+
+  if (queryLength > textLength) {
+    return false;
+  } else if (queryLength === textLength) {
+    return query === text;
+  }
+
+  for (let queryIndex = 0, textIndex = 0; queryIndex < queryLength; queryIndex += 1) {
+    const queryCharCode = query.charCodeAt(queryIndex);
+
+    let isMatched = false;
+
+    while (textIndex < textLength) {
+      const textCharCode = text.charCodeAt(textIndex);
+
+      textIndex += 1;
+
+      if (textCharCode === queryCharCode) {
+        isMatched = true;
+
+        break;
+      }
+    }
+
+    if (isMatched) {
+      continue;
+    }
+
+    return false;
+  }
+
+  return true;
 };
 
 /**
+ * Если ключ с вложениями, перебираем все вложения.
+ * @param {string} compositeKey
+ * @param {Object} item
+ *
+ * @example
+ * findNestedValue('a.b', { a: { b: 'value' } }) // 'value'
+ */
+const findNestedValue = (compositeKey: string, item: Record<string, any>): any => {
+  const keys: string[] = compositeKey.split('.');
+
+  return keys.reduce((accumulator: Record<string, any>, prop: string) => accumulator?.[prop], item);
+};
+
+/**
+ * Разбивает значение поля на отдельные слова, убирая специальные символы.
+ * Добавляет значение в новое поле `normalized_${key}`.
+ * @param {string[]} keys
+ * @param {Object} item
+ * @returns {string[]}
+ */
+const transformValuesToNormalized = (keys: string[], item: Record<string, any>): string[] =>
+  keys
+    .map((key: string): string => {
+      const normalizedKey: string = `normalized_${key}`;
+
+      if (Object.hasOwn(item, normalizedKey)) {
+        return item[normalizedKey];
+      }
+
+      const nestedValue: any = findNestedValue(key, item) ?? '';
+
+      const normalizedValue: string = String(nestedValue)
+        .toLowerCase()
+        .replace(/[^\p{L}\d]+/gimu, '');
+
+      item[normalizedKey] = normalizedValue;
+
+      return normalizedValue;
+    })
+    .filter(Boolean);
+
+type findMatchedItemsOptions = {
+  options: Record<string, any>[];
+  childrenField: string;
+  keys: string[];
+  queryWords: string[];
+  query: string;
+  enableFuzzySearch: boolean;
+};
+
+const findMatchedItems = (payload: findMatchedItemsOptions): Record<string, any>[] => {
+  const { childrenField, keys, queryWords, query, enableFuzzySearch } = payload;
+
+  return payload.options.flatMap((item: Record<string, any>): Record<string, any>[] => {
+    const setScoreAndGetItemWithChildren = (score: number): Record<string, any> | null => {
+      item['match_score'] = score;
+
+      // Если в основных полях не нашли и есть дети, ищем в них
+      if (!childrenField || !item[childrenField]?.length) {
+        return null;
+      }
+
+      // Список детей, подходящих под запрос
+      const children: Record<string, any>[] = findMatchedItems({
+        options: item[childrenField],
+        childrenField,
+        keys,
+        queryWords,
+        query,
+        enableFuzzySearch,
+      });
+
+      if (!children.length) {
+        return null;
+      }
+
+      const scores: number[] = children.map(childrenItem => childrenItem['match_score']);
+      const maxScore: number = Math.max(...scores);
+
+      if (maxScore > item['match_score']) {
+        item['match_score'] = maxScore;
+      }
+
+      return {
+        ...item,
+        [childrenField]: children,
+      };
+    };
+
+    // Нормализованные значения всех запрашиваемых полей
+    const normalizedValues: string[] = transformValuesToNormalized(keys, item);
+
+    const hasFullMatch: boolean = normalizedValues.some(word => word === query);
+
+    // Точное совпадение
+    if (hasFullMatch) {
+      return [setScoreAndGetItemWithChildren(4) ?? item];
+    }
+
+    const hasStartWithQuery: boolean = normalizedValues.some(word => word.startsWith(query));
+
+    // Начинается с запроса
+    if (hasStartWithQuery) {
+      return [setScoreAndGetItemWithChildren(3) ?? item];
+    }
+
+    // Содержит запрос внутри
+    const concatValue: string = normalizedValues.join(',');
+
+    const matchingStrings: string[] = queryWords.filter((word: string): boolean =>
+      concatValue.includes(word),
+    );
+
+    if (matchingStrings.length === queryWords.length) {
+      return [setScoreAndGetItemWithChildren(2) ?? item];
+    }
+
+    // Нечёткий поиск, для проверок на опечатки
+    if (enableFuzzySearch) {
+      const hasFuzzyMatch: boolean = fuzzySearch(query, concatValue);
+
+      if (hasFuzzyMatch) {
+        return [setScoreAndGetItemWithChildren(1) ?? item];
+      }
+    }
+
+    const itemWithChildren: Record<string, any> | null = setScoreAndGetItemWithChildren(0);
+
+    return itemWithChildren ? [itemWithChildren] : [];
+  });
+};
+
+export type SearchOptions = Partial<{
+  search: string;
+  options: Record<string, any>[];
+  childrenField: string;
+  keys: string[];
+  enableFuzzySearch: boolean;
+}>;
+
+/**
  * Поиск по поисковой фразе в списке по переданным ключам объекта.
- * @description search - поисковая фраза.
- * @description options - список объектов.
- * @description keys - список ключей объекта.
- * @description Возвращает отфильтрованный список объект по поисковым словам.
+ * @param {Object} payload
+ * @param {string} payload.search - поисковая фраза.
+ * @param {Object[]} payload.options - список объектов.
+ * @param {string} [payload.childrenField] - название поля дочернего списка.
+ * @param {string[]} payload.keys - список ключей объекта, разделённых точкой.
+ * @param {boolean} payload.enableFuzzySearch - включить поддержку нечёткого поиска.
+ * @returns {Object[]} - Возвращает отфильтрованный список объект по поисковым словам.
  */
 export const searchByKeys = (payload: SearchOptions = {}): Record<string, any>[] => {
   const search: string = payload.search ?? '';
   const options: Record<string, any>[] = payload.options ?? [];
+  const childrenField: string = payload.childrenField ?? '';
   const searchableKeys: string[] = payload.keys ?? [];
+  const enableFuzzySearch: boolean = !!payload.enableFuzzySearch;
 
+  // Разбивает поисковую фразу на отдельные слова, убирая специальные символы
+  // 'Какая-то фраза поиска и немного спец.символов +=-_()*?:%;№"!0123456789"'
+  // -> ['какая', 'то', 'фраза', 'поиска', 'и', 'немного', 'спец', 'символов', '0123456789']
   const searchWords: RegExpMatchArray | [] =
     String(search)
       .toLowerCase()
       .match(/[\p{L}\d]+/gimu) ?? [];
 
-  return options.flatMap((item: Record<string, any>): Record<string, any>[] => {
-    const concatValue: string = searchableKeys
-      .map((key: string) => {
-        const nestedKey: string[] = key.split('.');
+  // Объединяем ключевые слова в одно
+  const normalizedSearch: string = searchWords.join('');
 
-        // Если ключ с вложениями, перебираем все вложения
-        // key a.b, object.a.b: 'value' -> 'value'
-        const nestedValue: Record<string, any> = nestedKey.reduce(
-          (accumulator: Record<string, any>, prop: string) => accumulator?.[prop],
-          item,
-        );
+  // Если поисковой фразы нет, выходим
+  if (!normalizedSearch) {
+    return [];
+  }
 
-        return String(nestedValue).toLowerCase();
-      })
-      .filter(Boolean)
-      .join(', ');
-
-    const matchingStrings: string[] = searchWords.filter((word: string) =>
-      concatValue.includes(word),
-    );
-
-    return matchingStrings.length === searchWords.length ? [item] : [];
+  const result: Record<string, any>[] = findMatchedItems({
+    options,
+    childrenField,
+    keys: searchableKeys,
+    queryWords: searchWords,
+    query: normalizedSearch,
+    enableFuzzySearch,
   });
+
+  const hasHighest: boolean = result.some(item => item['match_score'] === 4);
+
+  if (hasHighest) {
+    return result.filter(item => item['match_score'] === 4);
+  }
+
+  const hasHigh: boolean = result.some(item => item['match_score'] === 3);
+
+  if (hasHigh) {
+    return result.filter(item => item['match_score'] === 3);
+  }
+
+  const hasMedium: boolean = result.some(item => item['match_score'] === 2);
+
+  if (hasMedium) {
+    return result.filter(item => item['match_score'] === 2);
+  }
+
+  return result;
 };
 
 export type ClipboardActions = {
@@ -962,7 +1165,7 @@ export type ClipboardActions = {
   paste: boolean;
 };
 
-/** Проверка поддержки браузером копирования/вставки */
+// Проверка поддержки браузером копирования/вставки
 export const checkClipboardFunctionality = async (): Promise<ClipboardActions> => {
   const actions: ClipboardActions = {
     copy: false,
@@ -997,7 +1200,7 @@ export const checkClipboardFunctionality = async (): Promise<ClipboardActions> =
   return actions;
 };
 
-/** Получение UTM-меток из поисковой строки */
+// Получение UTM-меток из поисковой строки
 export const getUTMLabels = (prefix: string = 'utm_'): Record<string, any> | null => {
   const queryString: string = window.location.search;
 
