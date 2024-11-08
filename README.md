@@ -312,6 +312,15 @@ memoAdd(24, 42); // Calculated
 memoAdd(42, 24); // From cache
 ```
 
+### Нечёткий поиск в строке по поисковой фразе
+
+```javascript
+import { fuzzySearch } from 'purejs-helpers';
+
+fuzzySearch('twl', 'cartwheel') // true
+fuzzySearch('eeel', 'cartwheel') // false
+```
+
 ### Поиск по поисковой фразе в списке по переданным ключам объекта
 
 ```javascript
@@ -330,6 +339,25 @@ searchByKeys({
   search: 'text any',
   options,
   keys: ['title', 'answer.text'],
+});
+
+const options = [
+  {
+    title: 'Any',
+    children: [
+      {
+        title: 'Some text',
+      }
+    ],
+  },
+];
+
+searchByKeys({
+  search: 'txt',
+  options,
+  childrenField: 'children',
+  keys: ['title'],
+  enableFuzzySearch: true,
 });
 ```
 
