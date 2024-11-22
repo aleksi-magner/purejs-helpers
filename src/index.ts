@@ -1123,7 +1123,7 @@ export const searchByKeys = (payload: SearchOptions = {}): Record<string, any>[]
       .match(/[\p{L}\d]+/gimu) ?? [];
 
   // Объединяем ключевые слова в одно
-  const normalizedSearch: string = searchWords.join('');
+  const normalizedSearch: string = searchWords.join('|');
 
   // Если поисковой фразы нет, выходим
   if (!normalizedSearch) {
