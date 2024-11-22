@@ -990,7 +990,7 @@ const transformValuesToNormalized = (keys: string[], item: Record<string, any>):
 
       const normalizedValue: string = String(nestedValue)
         .toLowerCase()
-        .replace(/[^\p{L}\d]+/gimu, '');
+        .replace(/[^\p{L}\d]+/gimu, '|'); // Чтобы разделять слова
 
       item[normalizedKey] = normalizedValue;
 

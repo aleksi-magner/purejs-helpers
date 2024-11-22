@@ -1,6 +1,6 @@
 {
   "name": "purejs-helpers",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "JavaScript helpers",
   "author": "Aleksey Magner",
   "license": "MIT",
@@ -29,13 +29,13 @@
     "major": "npm run build && npm version major --force -m 'Upgrade to %s' && npm run deploy"
   },
   "devDependencies": {
-    "@swc/cli": "^0.5.0",
-    "@swc/core": "^1.9.1",
-    "@vitest/coverage-v8": "^2.1.4",
-    "happy-dom": "^15.11.0",
+    "@swc/cli": "^0.5.1",
+    "@swc/core": "^1.9.3",
+    "@vitest/coverage-v8": "^2.1.5",
+    "happy-dom": "^15.11.6",
     "prettier": "^3.3.3",
     "typescript": "^5.6.3",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.5"
   },
   "engines": {
     "node": ">= 18"
