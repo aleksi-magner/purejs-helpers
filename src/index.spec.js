@@ -1012,7 +1012,7 @@ describe('helpers', () => {
       values: [
         70008564907,
         '80008564907',
-        '70d0-0856_4.90$7',
+        '90d0-0856_4.90$7',
         '+7 000 85-64-907',
         '7 (928) 280-07-00',
         700085649,
@@ -1033,8 +1033,8 @@ describe('helpers', () => {
           valid: true,
         },
         {
-          clearValue: '70d00856490$7',
-          formatValue: '+7 0d0 085-64-90',
+          clearValue: '90d00856490$7',
+          formatValue: '+9 0d0 085-64-90',
           valid: false,
         },
         {
@@ -1075,7 +1075,74 @@ describe('helpers', () => {
       ],
     },
     {
-      mask: '+7 999 xxx-xx-99',
+      mask: maskIt.phoneMask.ru,
+      values: [
+        70008564907,
+        '80008564907',
+        '90d0-0856_4.90$7',
+        '+7 000 85-64-907',
+        '7 (928) 280-07-00',
+        700085649,
+        '70d0-0856_4.$7',
+        null,
+        undefined,
+        '',
+      ],
+      expected: [
+        {
+          clearValue: '70008564907',
+          formatValue: '+7 000 856-49-07',
+          valid: true,
+        },
+        {
+          clearValue: '80008564907',
+          formatValue: '+7 000 856-49-07',
+          valid: true,
+        },
+        {
+          clearValue: '90d00856490$7',
+          formatValue: '+7 90d 008-56-49',
+          valid: false,
+        },
+        {
+          clearValue: '70008564907',
+          formatValue: '+7 000 856-49-07',
+          valid: true,
+        },
+        {
+          clearValue: '79282800700',
+          formatValue: '+7 928 280-07-00',
+          valid: true,
+        },
+        {
+          clearValue: '700085649',
+          formatValue: '+7 000 856-49',
+          valid: false,
+        },
+        {
+          clearValue: '70d008564$7',
+          formatValue: '+7 0d0 085-64-$7',
+          valid: false,
+        },
+        {
+          clearValue: '',
+          formatValue: '',
+          valid: false,
+        },
+        {
+          clearValue: '',
+          formatValue: '',
+          valid: false,
+        },
+        {
+          clearValue: '',
+          formatValue: '',
+          valid: false,
+        },
+      ],
+    },
+    {
+      mask: maskIt.phoneMask.ru_anon,
       values: [
         80008564907,
         '80008564907',
@@ -1103,7 +1170,7 @@ describe('helpers', () => {
         },
         {
           clearValue: '90008564907',
-          formatValue: '+7 000 xxx-xx-07',
+          formatValue: '+7 900 xxx-xx-90',
           valid: true,
         },
         {

@@ -634,8 +634,6 @@ export const weekNumberToDate = (year: number, weekNumber: number): Date => {
 type MaskHelpers = {
   /** Набор спец.символов */
   readonly special: RegExp;
-  /** Набор статических символов, без замены */
-  readonly static: RegExp;
   /** Словарь для составления регулярных выражений */
   readonly dictionary: Record<string, string>;
   /** Создание регулярного выражения по маске */
@@ -644,7 +642,6 @@ type MaskHelpers = {
 
 const maskItHelpers: MaskHelpers = {
   special: /[\s-+/._{}()[\]]/,
-  static: /[7x]/,
   dictionary: {
     Z: '[A-Z]',
     9: '\\d',
@@ -701,6 +698,10 @@ const maskItHelpers: MaskHelpers = {
 };
 
 export type MaskMethods = {
+  readonly phoneMask: {
+    ru: string;
+    ru_anon: string;
+  };
   readonly clear: (value: string | number) => string;
   /**
    * Формирование значения по маске
@@ -720,6 +721,10 @@ export type MaskMethods = {
 
 /** Форматирование по маске */
 export const maskIt: Readonly<MaskMethods> = Object.freeze({
+  phoneMask: {
+    ru: '+7 999 999-99-99',
+    ru_anon: '+7 999 xxx-xx-99',
+  },
   clear(value: string | number): string {
     if (!value) {
       return '';
@@ -736,26 +741,36 @@ export const maskIt: Readonly<MaskMethods> = Object.freeze({
       return '';
     }
 
+    const isPhoneMask: boolean = Object.values(maskIt.phoneMask).some(
+      (phoneMask: string): boolean => phoneMask === mask,
+    );
+
     const maskArray: string[] = mask.split('');
 
     let count: number = 0;
     let formatValue: string = '';
 
     for (const symbol of maskArray) {
-      if (count < clearValue.length) {
-        const isSpecialCharacter: boolean = maskItHelpers.special.test(symbol);
+      if (count >= clearValue.length) {
+        break;
+      }
 
-        if (isSpecialCharacter) {
-          formatValue += symbol;
-        } else {
-          const isStaticCharacter: boolean = maskItHelpers.static.test(symbol);
+      const isSpecialCharacter: boolean = maskItHelpers.special.test(symbol);
 
-          formatValue += isStaticCharacter ? symbol : clearValue.charAt(count);
+      if (isSpecialCharacter) {
+        formatValue += symbol;
+      } else if (isPhoneMask && /[7x]/.test(symbol)) {
+        const valueChar: string = clearValue.charAt(count);
+        const invalidValue: boolean = symbol === '7' && !['7', '8'].includes(valueChar);
 
+        formatValue += symbol;
+
+        if (!invalidValue) {
           count += 1;
         }
       } else {
-        break;
+        formatValue += clearValue.charAt(count);
+        count += 1;
       }
     }
 
