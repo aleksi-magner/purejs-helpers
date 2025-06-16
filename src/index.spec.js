@@ -1529,6 +1529,26 @@ describe('helpers', () => {
       {
         text: 'Content',
       },
+      {
+        text: 'Content - Some (42)',
+      },
+      {
+        text: 'Проверка документов',
+        children: [
+          {
+            id: 2632,
+            text: 'Документ о проживании принят',
+          },
+          {
+            id: 279,
+            text: 'ИНН на рассмотрении',
+          },
+          {
+            id: 26,
+            text: 'ИНН отклонён',
+          },
+        ],
+      },
     ];
 
     const searchByKeysCases = [
@@ -1683,6 +1703,12 @@ describe('helpers', () => {
             'normalized_sub.name': '',
             normalized_text: 'content',
           },
+          {
+            text: 'Content - Some (42)',
+            match_score: 2,
+            'normalized_sub.name': '',
+            normalized_text: 'content|some|42|',
+          },
         ],
       },
       {
@@ -1716,6 +1742,75 @@ describe('helpers', () => {
             match_score: 1,
             'normalized_sub.name': '',
             normalized_text: 'content',
+          },
+          {
+            text: 'Content - Some (42)',
+            match_score: 1,
+            'normalized_sub.name': '',
+            normalized_text: 'content|some|42|',
+          },
+        ],
+      },
+      {
+        param: {
+          search: 'some',
+          options: [...options],
+          keys: ['text'],
+          enableFuzzySearch: false,
+        },
+        expected: [
+          {
+            text: 'Content - Some (42)',
+            match_score: 2,
+            'normalized_sub.name': '',
+            normalized_text: 'content|some|42|',
+          },
+        ],
+      },
+      {
+        param: {
+          search: 'som',
+          options: [...options],
+          keys: ['text'],
+          enableFuzzySearch: true,
+        },
+        expected: [
+          {
+            text: 'Content - Some (42)',
+            match_score: 2,
+            'normalized_sub.name': '',
+            normalized_text: 'content|some|42|',
+          },
+        ],
+      },
+      {
+        param: {
+          search: 'ИНН',
+          options: [...options],
+          childrenField: 'children',
+          keys: ['text'],
+          enableFuzzySearch: false,
+        },
+        expected: [
+          {
+            text: 'Проверка документов',
+            match_score: 3,
+            'normalized_sub.name': '',
+            normalized_text: 'проверка|документов',
+            children: [
+              {
+                id: 279,
+                text: 'ИНН на рассмотрении',
+                match_score: 3,
+                normalized_text: 'инн|на|рассмотрении',
+              },
+              {
+                id: 26,
+                text: 'ИНН отклонён',
+                match_score: 3,
+                normalized_text: 'инн|отклонён',
+              },
+            ],
           },
         ],
       },
