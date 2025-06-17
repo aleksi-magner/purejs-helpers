@@ -1156,22 +1156,12 @@ export const searchByKeys = (payload: SearchOptions = {}): Record<string, any>[]
 
   const hasHighest: boolean = result.some(item => item['match_score'] === 4);
 
+  // Есть точное совпадение. Оставляем элементы только с ним
   if (hasHighest) {
     return result.filter(item => item['match_score'] === 4);
   }
 
-  const hasHigh: boolean = result.some(item => item['match_score'] === 3);
-
-  if (hasHigh) {
-    return result.filter(item => item['match_score'] === 3);
-  }
-
-  const hasMedium: boolean = result.some(item => item['match_score'] === 2);
-
-  if (hasMedium) {
-    return result.filter(item => item['match_score'] === 2);
-  }
-
+  // Иначе оставляем весь найденный список
   return result;
 };
 
