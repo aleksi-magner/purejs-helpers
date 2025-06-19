@@ -881,7 +881,7 @@ export const deepClone = (sourceObject: any): any => {
     return arrayClone;
   }
 
-  const objectClone: Record<string, any> = { ...sourceObject }; // Object.assign({}, <Record<string, any>>sourceObject);
+  const objectClone: Record<string, any> = { ...sourceObject };
 
   Object.keys(objectClone).forEach((key: string): void => {
     const value = sourceObject[key];
@@ -1064,25 +1064,23 @@ const findMatchedItems = (payload: findMatchedItemsOptions): Record<string, any>
     // Нормализованные значения всех запрашиваемых полей
     const normalizedValues: string[] = transformValuesToNormalized(keys, item);
 
+    // Точное совпадение
     const hasFullMatch: boolean = normalizedValues.some(word => word === query);
 
-    // Точное совпадение
     if (hasFullMatch) {
       return [setScoreAndGetItemWithChildren(4) ?? item];
     }
 
+    // Начинается с запроса
     const hasStartWithQuery: boolean = normalizedValues.some(word => word.startsWith(query));
 
-    // Начинается с запроса
     if (hasStartWithQuery) {
       return [setScoreAndGetItemWithChildren(3) ?? item];
     }
 
-    // Содержит запрос внутри
-    const concatValue: string = normalizedValues.join(',');
-
-    const matchingStrings: string[] = queryWords.filter((word: string): boolean =>
-      concatValue.includes(word),
+    // Содержит запрос внутри хотя бы в одном из полей
+    const matchingStrings: string[] = queryWords.filter(queryWord =>
+      normalizedValues.some(normalizedString => normalizedString.includes(queryWord)),
     );
 
     if (matchingStrings.length === queryWords.length) {
@@ -1091,13 +1089,15 @@ const findMatchedItems = (payload: findMatchedItemsOptions): Record<string, any>
 
     // Нечёткий поиск, для проверок на опечатки
     if (enableFuzzySearch) {
-      const hasFuzzyMatch: boolean = fuzzySearch(query, concatValue);
+      // Есть нечёткое соответствие в одном из полей
+      const hasFuzzyMatch: boolean = normalizedValues.some(word => fuzzySearch(query, word));
 
       if (hasFuzzyMatch) {
         return [setScoreAndGetItemWithChildren(1) ?? item];
       }
     }
 
+    // Нет совпадений
     const itemWithChildren: Record<string, any> | null = setScoreAndGetItemWithChildren(0);
 
     return itemWithChildren ? [itemWithChildren] : [];
@@ -1161,7 +1161,8 @@ export const searchByKeys = (payload: SearchOptions = {}): Record<string, any>[]
     return result.filter(item => item['match_score'] === 4);
   }
 
-  // Иначе оставляем весь найденный список
+  // Иначе оставляем весь найденный список.
+  // Вывод отдельных приоритетов, кроме точного соответствия не показывает всю картину
   return result;
 };
 
