@@ -2,6 +2,7 @@ import { vi, describe, test, expect } from 'vitest';
 
 import {
   locale,
+  MILLISECONDS_IN_DAY,
   getEnvironment,
   isKZ,
   cookie,
@@ -37,6 +38,10 @@ import {
 describe('helpers', () => {
   test('locale', () => {
     expect(locale).toBe('ru-RU');
+  });
+
+  test('MILLISECONDS_IN_DAY', () => {
+    expect(MILLISECONDS_IN_DAY).toBe(86400000);
   });
 
   const envCases = [
@@ -200,15 +205,29 @@ describe('helpers', () => {
 
     expect(cookie.get('any_code4')).toBe('');
 
+    cookie.set('any_code5', 'value5', {
+      SameSite: 'SomeThing',
+      Secure: false,
+      'Max-Age': 34874878946,
+    });
+
+    expect(document.cookie).toBe(
+      'any_code1=any_value%20text; any%20name=any_value%20text; any_code3=any...text.42; any_code4; any_code5=value5',
+    );
+
+    expect(cookie.get('any_code5')).toBe('value5');
+
     cookie.delete('any_code1');
     cookie.delete('any name');
     cookie.delete('any_code3');
     cookie.delete('any_code4');
+    cookie.delete('any_code5');
 
     expect(cookie.get('any_code1')).toBe('');
     expect(cookie.get('any name')).toBe('');
     expect(cookie.get('any_code3')).toBe('');
     expect(cookie.get('any_code4')).toBe('');
+    expect(cookie.get('any_code5')).toBe('');
 
     expect(document.cookie).toBe('');
 
@@ -497,45 +516,31 @@ describe('helpers', () => {
 
   const toISODateCases = [
     {
-      param: undefined,
+      date: undefined,
       expected: '',
     },
     {
-      param: null,
+      date: null,
       expected: '',
     },
     {
-      param: new Date('2022-32-33'),
+      date: new Date('2022-32-33'),
       expected: '',
     },
     {
-      param: new Date('2022-04-26T21:06:06.405296+03:00'),
+      date: new Date('2022-04-26T21:06:06.405296+03:00'),
       expected: '2022-04-26',
     },
     {
-      param: new Date('2022-04-26T21:06:06+05:00'),
+      date: new Date('2022-04-26T21:06:06+05:00'),
       expected: '2022-04-26',
     },
   ];
 
   test.each(toISODateCases)('toISODate', payload => {
-    const { DateTimeFormat } = window.Intl;
+    const { date, expected } = payload;
 
-    const dateTimeFormat = vi.spyOn(window.Intl, 'DateTimeFormat');
-
-    dateTimeFormat.mockImplementation(
-      (locale, options) =>
-        new DateTimeFormat(locale, {
-          ...options,
-          timeZone: 'Europe/Moscow',
-        }),
-    );
-
-    const { param, expected } = payload;
-
-    expect(toISODate(param)).toBe(expected);
-
-    window.Intl.DateTimeFormat = DateTimeFormat;
+    expect(toISODate(date)).toBe(expected);
   });
 
   describe('Check dateToDateShort', () => {
@@ -579,35 +584,43 @@ describe('helpers', () => {
 
   const ISOToDateFormatCases = [
     {
-      param: undefined,
+      params: [undefined],
       expected: '',
     },
     {
-      param: null,
+      params: [null],
       expected: '',
     },
     {
-      param: '',
+      params: [''],
       expected: '',
     },
     {
-      param: 42,
+      params: [42],
       expected: '',
     },
     {
-      param: '2022-04-26',
+      params: ['42'],
+      expected: '',
+    },
+    {
+      params: ['2022-04-26'],
       expected: '26.04.2022',
     },
     {
-      param: '2022-04-26T21:06:06+05:00',
-      expected: '',
+      params: ['2022-04-26T21:06:06+05:00'],
+      expected: '26.04.2022',
+    },
+    {
+      params: ['2022-04-26T21:06:06+05:00', ''],
+      expected: '26.04.2022',
     },
   ];
 
   test.each(ISOToDateFormatCases)('ISOToDateFormat', payload => {
-    const { param, expected } = payload;
+    const { params, expected } = payload;
 
-    expect(ISOToDateFormat(param)).toBe(expected);
+    expect(ISOToDateFormat(...params)).toBe(expected);
   });
 
   describe('Check dateTime', () => {
@@ -1683,6 +1696,43 @@ describe('helpers', () => {
       },
       {
         param: {
+          search: 'Place',
+          options: [
+            {
+              text: 'Place',
+              baby: [
+                {
+                  name: 'Place 1',
+                  description: 'Some_description-!@#$%^&*()_+=',
+                },
+              ],
+            },
+          ],
+          childrenField: 'baby',
+          keys: ['text', 'name', 'description'],
+        },
+        expected: [
+          {
+            text: 'Place',
+            match_score: 4,
+            normalized_text: 'place',
+            normalized_name: '',
+            normalized_description: '',
+            baby: [
+              {
+                name: 'Place 1',
+                description: 'Some_description-!@#$%^&*()_+=',
+                match_score: 3,
+                normalized_text: '',
+                normalized_name: 'place|1',
+                normalized_description: 'some|description|',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        param: {
           search: 'onten',
           options: [...options],
           keys: ['text'],
@@ -1926,6 +1976,8 @@ describe('helpers', () => {
 
     const query = async ({ name = '' }) =>
       new Promise((resolve, reject) => {
+        console.log('Query func', name);
+
         if (name === 'clipboard-read') {
           return resolve({
             name: 'clipboard_read',
@@ -1996,6 +2048,27 @@ describe('helpers', () => {
         expected: {
           isCanCopy: true,
           isCanPaste: true,
+        },
+      },
+      {
+        handleNavigator: {
+          clipboard: {
+            writeText: copy,
+            readText: paste('success'),
+          },
+          permissions: {
+            async query({ name = '' }) {
+              return Promise.resolve({
+                name: 'clipboard_read',
+                state: 'wrong-state',
+                onchange: null,
+              });
+            },
+          },
+        },
+        expected: {
+          isCanCopy: true,
+          isCanPaste: false,
         },
       },
     ];

@@ -1,5 +1,12 @@
-/** Локализация по умолчанию */
+/**
+ * Локализация по умолчанию
+ */
 export const locale: string = 'ru-RU';
+
+/**
+ * Количество миллисекунд в сутках
+ */
+export const MILLISECONDS_IN_DAY = 86400000; // 24 * 60 * 60 * 1000
 
 export type Environment = {
   server: string;
@@ -9,21 +16,24 @@ export type Environment = {
 
 /**
  * Определение окружения по домену
+ * @param {string} [name=''] - Значение в имени хоста
+ * @return {Environment}
+ *
  * @example
  * https://any-verme.ru
  * getEnvironment('verme')
  * // { server: 'any', isLocal: false, mode: 'development' }
  */
 export const getEnvironment = (name: string = ''): Environment => {
-  const host: string = window.location.hostname;
+  const host: string = globalThis.location.hostname;
 
   const isLocalServer: boolean = Boolean(
     host === 'localhost' ||
-      // IPv4 localhost address
-      /^127(?:\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)){3}$/.test(host),
+    // IPv4 localhost address
+    /^127(?:\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)){3}$/.test(host),
   );
 
-  const regExp: RegExp = new RegExp(['(?=-).*(?=\\.', name, ')'].join(''));
+  const regExp: RegExp = new RegExp([String.raw`(?=-).*(?=\.`, name, ')'].join(''));
   const environment: string = regExp.exec(host)?.[0].replace('-', '') ?? 'production';
 
   return {
@@ -35,11 +45,13 @@ export const getEnvironment = (name: string = ''): Environment => {
 
 /**
  * Определение казахского домена
+ * @return {boolean}
+ *
  * @example
  * https://any-domain.kz
  * isKZ() // true
  */
-export const isKZ = (): boolean => window.location.hostname.includes('.kz');
+export const isKZ = (): boolean => globalThis.location.hostname.includes('.kz');
 
 export type CookieCreateOptions = {
   Domain?: string;
@@ -131,8 +143,8 @@ export const cookie: Readonly<Cookie> = Object.freeze({
         }
 
         case option === 'SameSite': {
-          if (['None', 'Strict', 'Lax'].some((code: string): boolean => code === value)) {
-            cookieOptions[<'SameSite'>option] = <string>value;
+          if (['None', 'Strict', 'Lax'].includes(value as string)) {
+            cookieOptions[<'SameSite'>option] = value as string;
           }
 
           break;
@@ -191,7 +203,11 @@ export const cookie: Readonly<Cookie> = Object.freeze({
   },
 });
 
-/** Определение типа переданного значения */
+/**
+ * Определение типа переданного значения
+ * @param [value] - Проверяемое значение
+ * @return {string}
+ */
 export const getType = (value?: any): string => {
   switch (value) {
     case undefined: {
@@ -210,15 +226,15 @@ export const getType = (value?: any): string => {
 
 /**
  * Добавление ведущего нуля
+ * @param {(string | number)} value - Число
+ * @return {string}
+ *
  * @example
  * leadingZero(9); // '09'
  */
 export const leadingZero = (value: string | number): string => {
   const type: string = getType(value);
-
-  const invalid: boolean =
-    !value || !['Number', 'String'].some((allowed: string): boolean => allowed === type);
-
+  const invalid: boolean = !value || !['Number', 'String'].includes(type);
   const number: string | number = invalid ? 0 : value;
 
   return String(number).padStart(2, '0');
@@ -226,8 +242,10 @@ export const leadingZero = (value: string | number): string => {
 
 /**
  * Преобразование числа в сумму
- * @param value - Значение суммы
- * @param [fraction=1] - Количество символов после запятой
+ * @param {number} [value] - Значение суммы
+ * @param {number} [fraction=1] - Количество символов после запятой
+ * @return {string}
+ *
  * @example
  * currencyMask(1840); // '1 840 ₽'
  */
@@ -248,6 +266,10 @@ export const currencyMask = (value: number | undefined | null, fraction: number 
 
 /**
  * Окончания слов
+ * @param {(number | string)} amount - Количество
+ * @param {string[]} titles - Список склонений слов
+ * @return {string}
+ *
  * @example
  * wordEndings(17, ['метр', 'метра', 'метров']); // '17 метров'
  */
@@ -271,6 +293,10 @@ export const wordEndings = (amount: number | string, titles: [string, string, st
 
 /**
  * Преобразование числа в расстояние
+ * @param {(string | number)} distance - Дистанция
+ * @param {boolean} [short=false] - Использовать короткий формат
+ * @return {string}
+ *
  * @example
  * distanceFormat(42); // '42 метра'
  * distanceFormat(42, true); // '42 м'
@@ -278,10 +304,7 @@ export const wordEndings = (amount: number | string, titles: [string, string, st
  */
 export const distanceFormat = (distance: number | string, short: boolean = false): string => {
   const type: string = getType(distance);
-
-  const validType: boolean = ['Number', 'String'].some(
-    (allowed: string): boolean => allowed === type,
-  );
+  const validType: boolean = ['Number', 'String'].includes(type);
 
   if (!distance || !validType) {
     return '';
@@ -300,6 +323,9 @@ export const distanceFormat = (distance: number | string, short: boolean = false
 
 /**
  * Получение преобразованного размера файла
+ * @param {number} bytes - Количество байт
+ * @return {string}
+ *
  * @example
  * bytesToSize(40031); // '39.09 кБ'
  */
@@ -323,7 +349,11 @@ export const bytesToSize = (bytes: number): string => {
   return [size, unit.at(sizeIndex)].join(' ');
 };
 
-/** Проверка объекта даты на валидность */
+/**
+ * Проверка объекта даты на валидность
+ * @param {Date} [date] - Дата
+ * @return {boolean}
+ */
 export const dateIsValid = (date?: Date): boolean => {
   if (!date) {
     return false;
@@ -334,6 +364,9 @@ export const dateIsValid = (date?: Date): boolean => {
 
 /**
  * Преобразование даты в ISO формат
+ * @param {Date} date - Дата
+ * @return {string}
+ *
  * @example
  * toISODate(new Date('2020-10-21T08:45:00')); // '2020-10-21'
  */
@@ -353,6 +386,10 @@ export const toISODate = (date: Date): string => {
 
 /**
  * Преобразование даты в формат DD.MM.YYYY
+ * @param {Date} date - Дата
+ * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {string}
+ *
  * @example
  * dateToDateShort(new Date('2020-10-21T08:45:00')); // '21.10.2020'
  */
@@ -376,19 +413,25 @@ export const dateToDateShort = (date: Date, timeZone: string = 'Europe/Moscow'):
 
 /**
  * Преобразование ISO даты в формат DD.MM.YYYY
+ * @param {string} ISODate - Дата в формате ISO
+ * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {string}
+ *
  * @example
  * ISOToDateFormat('1979-12-03'); // '03.12.1979'
+ * ISOToDateFormat('2022-04-26T21:06:06+05:00'); // '26.04.2022'
  */
 export const ISOToDateFormat = (ISODate: string, timeZone: string = 'Europe/Moscow'): string => {
-  const datePattern: RegExp = /^(\d{4})-(\d{1,2})-(\d{1,2})$/; // 'YYYY-MM-DD'
-
-  const invalid: boolean = [
-    !ISODate,
-    getType(ISODate) !== 'String',
-    !datePattern.test(ISODate),
-  ].some(Boolean);
+  const invalid: boolean = [!ISODate, getType(ISODate) !== 'String'].some(Boolean);
 
   if (invalid) {
+    return '';
+  }
+
+  const datePattern: RegExp = /^(\d{4})-(\d{1,2})-(\d{1,2})/; // 'YYYY-MM-DD'
+  const ISODateFormat = datePattern.exec(ISODate)?.at(0);
+
+  if (!ISODateFormat) {
     return '';
   }
 
@@ -407,6 +450,10 @@ export const ISOToDateFormat = (ISODate: string, timeZone: string = 'Europe/Mosc
 
 /**
  * Преобразование даты в формат DD.MM.YYYY, HH:MM
+ * @param {Date} date - Дата
+ * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {string}
+ *
  * @example
  * dateTime(new Date('2020-10-21T08:45:00')); // '21.10.2020, 08:45'
  */
@@ -440,6 +487,9 @@ export type DateToDateLong = {
 
 /**
  * Преобразование даты в формат WW, DD MMMM YYYY
+ * @param {DateToDateLong} [payload={}] - Параметры даты
+ * @return {string}
+ *
  * @example
  * // '21 октября 2020'
  * dateToDateLong({
@@ -499,6 +549,10 @@ export const dateToDateLong = (payload: DateToDateLong = {}): string => {
 
 /**
  * Преобразование даты в формат HH:MM
+ * @param {Date} date - Дата
+ * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {string}
+ *
  * @example
  * dateToHoursMinutes(new Date('2020-10-21')); // '08:45'
  */
@@ -522,6 +576,10 @@ export const dateToHoursMinutes = (date: Date, timeZone: string = 'Europe/Moscow
 
 /**
  * Преобразование числа в формат HH:MM
+ * @param {number} value - Количество минут
+ * @param {boolean} [byParts=false] - Часовой пояс
+ * @return {string}
+ *
  * @example
  * minutesToHoursMinutes(480); // '08:00'
  */
@@ -561,6 +619,9 @@ export type HourTimestamp = {
 
 /**
  * Получение объекта с московским временем из даты
+ * @param {string} dateString - Дата в формате ISO
+ * @return {HourTimestamp}
+ *
  * @example
  * getMoscowTime('2022-05-02T08:00:00Z');
  * // { hour: '12', minute: '00', timestamp: 1643041320000 }
@@ -593,6 +654,9 @@ export const getMoscowTime = (dateString: string): HourTimestamp => {
 
 /**
  * Получение номера недели в году
+ * @param {Date} [currentDate=new Date()] - Дата
+ * @return {number}
+ *
  * @example
  * weekOfYear(new Date('2020-10-21')); // 43
  */
@@ -601,14 +665,12 @@ export const weekOfYear = (currentDate: Date = new Date()): number => {
     return 0;
   }
 
-  const date: Date = new Date(currentDate.getTime());
+  const date: Date = new Date(currentDate);
 
   date.setHours(0, 0, 0, 0);
   date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
 
   const firstWeek: Date = new Date(date.getFullYear(), 0, 4);
-  const MILLISECONDS_IN_DAY = 86400000; // 24 * 60 * 60 * 1000
-
   const currentYearDay: number = (date.getTime() - firstWeek.getTime()) / MILLISECONDS_IN_DAY;
 
   return 1 + Math.round((currentYearDay - 3 + ((firstWeek.getDay() + 6) % 7)) / 7);
@@ -616,6 +678,10 @@ export const weekOfYear = (currentDate: Date = new Date()): number => {
 
 /**
  * Получения даты начала недели по номеру недели
+ * @param {number} year - Год
+ * @param {number} weekNumber - Номер недели
+ * @return {Date}
+ *
  * @example
  * weekNumberToDate(2020, 43); // Wed Oct 21 2020 00:00:00 GMT+0300
  */
@@ -644,21 +710,21 @@ const maskItHelpers: MaskHelpers = {
   special: /[\s-+/._{}()[\]]/,
   dictionary: {
     Z: '[A-Z]',
-    9: '\\d',
+    9: String.raw`\d`,
     7: '7',
     x: 'x',
-    ' ': '\\s',
-    '+': '\\+',
+    ' ': String.raw`\s`,
+    '+': String.raw`\+`,
     '-': '-',
     _: '_',
     '/': '/',
-    '.': '\\.',
-    '(': '\\(',
-    ')': '\\)',
-    '{': '\\{',
-    '}': '\\}',
-    '[': '\\[',
-    ']': '\\]',
+    '.': String.raw`\.`,
+    '(': String.raw`\(`,
+    ')': String.raw`\)`,
+    '{': String.raw`\{`,
+    '}': String.raw`\}`,
+    '[': String.raw`\[`,
+    ']': String.raw`\]`,
   },
   createRegExpByMask(mask: string | undefined): RegExp {
     const fullValue: RegExp = /.*/;
@@ -675,15 +741,16 @@ const maskItHelpers: MaskHelpers = {
       }
 
       const symbol: string = string.charAt(0);
+      const pattern = maskItHelpers.dictionary[symbol];
 
-      if (maskItHelpers.dictionary[symbol]) {
+      if (pattern) {
         const matchArray: RegExpMatchArray = <RegExpMatchArray>(
-          new RegExp(`${maskItHelpers.dictionary[symbol]}*`).exec(string)
+          new RegExp(`${pattern}*`).exec(string)
         );
 
         const { length } = <string>matchArray.at(0);
 
-        regExp += `${maskItHelpers.dictionary[symbol]}{${length}}`;
+        regExp += `${pattern}{${length}}`;
 
         addRegExpRange(string.slice(length));
       } else {
@@ -741,10 +808,7 @@ export const maskIt: Readonly<MaskMethods> = Object.freeze({
       return '';
     }
 
-    const isPhoneMask: boolean = Object.values(maskIt.phoneMask).some(
-      (phoneMask: string): boolean => phoneMask === mask,
-    );
-
+    const isPhoneMask: boolean = Object.values(maskIt.phoneMask).includes(mask);
     const maskArray: string[] = mask.split('');
 
     let count: number = 0;
@@ -784,7 +848,11 @@ export const maskIt: Readonly<MaskMethods> = Object.freeze({
   },
 });
 
-/** Преобразование файла в Base64 */
+/**
+ * Преобразование файла в Base64
+ * @param {File} file - Файл
+ * @return {Promise<string>}
+ */
 export const convertFileToBase64 = (file: File): Promise<string> => {
   if (!file) {
     return Promise.resolve('');
@@ -794,11 +862,10 @@ export const convertFileToBase64 = (file: File): Promise<string> => {
 
   return new Promise(resolve => {
     reader.onload = (): void => {
-      const base64: string | ArrayBuffer | null = reader.result;
+      // Всегда строка при использовании readAsDataURL()
+      const base64: string = reader.result as string;
 
-      if (typeof base64 === 'string') {
-        resolve(<string>base64.split('base64,', 2).at(1));
-      }
+      resolve(<string>base64.split('base64,', 2).at(1));
     };
 
     reader.readAsDataURL(file);
@@ -807,6 +874,9 @@ export const convertFileToBase64 = (file: File): Promise<string> => {
 
 /**
  * Сокращение ФИО до формата ФффИО или ФфффИ (если нет отчества)
+ * @param {string} fullName - ФИО
+ * @return {string}
+ *
  * @example
  * shortName('Светлова Александра Андреевна'); // 'СвеАА'
  * shortName('Бекр Фуркад'); // 'БекрФ'
@@ -840,19 +910,23 @@ export const shortName = (fullName: string): string => {
 
   const name: string = [shortSurname, firstnameInitials, patronymicInitials].join('');
 
-  return !name ? '――' : name;
+  return name || '――';
 };
 
 /**
  * Удаление ключей из объекта
+ * @param {string[]} exclusionFields - Список исключаемых полей
+ * @param {Object} [sourceObject={}] - Исходный объект
+ * @return {Object}
+ *
  * @example
  * removeObjectKeys(['a'], { a: 13, b: 42 }); // { b: 42 }
  */
 export const removeObjectKeys = (
   exclusionFields: string[],
-  sourceObject: {},
+  sourceObject: Record<string, any> = {},
 ): Record<string, any> => {
-  const object: Record<string, any> = { ...(sourceObject || {}) };
+  const object: Record<string, any> = { ...sourceObject };
 
   (exclusionFields || []).forEach((key: string): void => {
     delete object[key];
@@ -861,37 +935,29 @@ export const removeObjectKeys = (
   return object;
 };
 
-/** Рекурсивное (глубокое) копирование объекта (массива) */
+/**
+ * Рекурсивное (глубокое) копирование объекта (массива)
+ * @param sourceObject - Клонируемое значение
+ */
 export const deepClone = (sourceObject: any): any => {
   if (!sourceObject || typeof sourceObject !== 'object') {
     return sourceObject;
   } else if (sourceObject instanceof Date) {
     return new Date(sourceObject);
-  } else if (Array.isArray(sourceObject)) {
-    const arrayClone: any[] = [...sourceObject];
-
-    for (let index = 0; index < arrayClone.length; index += 1) {
-      const value = arrayClone[index];
-
-      if (typeof value === 'object') {
-        arrayClone[index] = deepClone(value);
-      }
-    }
-
-    return arrayClone;
   }
 
-  const objectClone: Record<string, any> = { ...sourceObject };
+  const clone: any[] | Record<string, any> = Array.isArray(sourceObject)
+    ? [...(sourceObject as [])]
+    : { ...(sourceObject as {}) };
 
-  Object.keys(objectClone).forEach((key: string): void => {
-    const value = sourceObject[key];
+  Object.keys(clone).forEach((key: string | number): void => {
+    const value: any = sourceObject[key];
 
-    if (typeof value === 'object') {
-      objectClone[key] = deepClone(value);
-    }
+    // @ts-ignore
+    clone[key] = typeof value === 'object' ? deepClone(value) : value;
   });
 
-  return objectClone;
+  return clone;
 };
 
 type MemoHandler = {
@@ -901,6 +967,9 @@ type MemoHandler = {
 
 /**
  * Мемоизация
+ * @param {Function} callback - Функция обратного вызова
+ * @return {Function}
+ *
  * @example
  * const add = (x, y) => x + y;
  * const memoAdd = memo(add);
@@ -928,7 +997,7 @@ export const memo = (callback: Function): Function =>
  * Нечёткий поиск в строке по поисковой фразе.
  * @param {string} query - поисковая фраза.
  * @param {string} text - текст, в котором искать.
- * @returns {boolean}
+ * @return {boolean}
  *
  * @example
  * fuzzySearch('twl', 'cartwheel') // true
@@ -945,12 +1014,12 @@ export const fuzzySearch = (query: string, text: string): boolean => {
   }
 
   for (let queryIndex = 0, textIndex = 0; queryIndex < queryLength; queryIndex += 1) {
-    const queryCharCode = query.charCodeAt(queryIndex);
+    const queryCharCode = query.codePointAt(queryIndex);
 
     let isMatched = false;
 
     while (textIndex < textLength) {
-      const textCharCode = text.charCodeAt(textIndex);
+      const textCharCode = text.codePointAt(textIndex);
 
       textIndex += 1;
 
@@ -990,7 +1059,7 @@ const findNestedValue = (compositeKey: string, item: Record<string, any>): any =
  * Добавляет значение в новое поле `normalized_${key}`.
  * @param {string[]} keys
  * @param {Object} item
- * @returns {string[]}
+ * @return {string[]}
  */
 const transformValuesToNormalized = (keys: string[], item: Record<string, any>): string[] =>
   keys
@@ -1005,7 +1074,7 @@ const transformValuesToNormalized = (keys: string[], item: Record<string, any>):
 
       const normalizedValue: string = String(nestedValue)
         .toLowerCase()
-        .replace(/[^\p{L}\d]+/gimu, '|'); // Чтобы разделять слова
+        .replaceAll(/[^\p{L}\d]+/gimu, '|'); // Чтобы разделять слова
 
       item[normalizedKey] = normalizedValue;
 
@@ -1065,7 +1134,7 @@ const findMatchedItems = (payload: findMatchedItemsOptions): Record<string, any>
     const normalizedValues: string[] = transformValuesToNormalized(keys, item);
 
     // Точное совпадение
-    const hasFullMatch: boolean = normalizedValues.some(word => word === query);
+    const hasFullMatch: boolean = normalizedValues.includes(query);
 
     if (hasFullMatch) {
       return [setScoreAndGetItemWithChildren(4) ?? item];
@@ -1114,13 +1183,13 @@ export type SearchOptions = Partial<{
 
 /**
  * Поиск по поисковой фразе в списке по переданным ключам объекта.
- * @param {Object} payload
+ * @param {SearchOptions} [payload={}]
  * @param {string} payload.search - поисковая фраза.
  * @param {Object[]} payload.options - список объектов.
  * @param {string} [payload.childrenField] - название поля дочернего списка.
  * @param {string[]} payload.keys - список ключей объекта, разделённых точкой.
  * @param {boolean} payload.enableFuzzySearch - включить поддержку нечёткого поиска.
- * @returns {Object[]} - Возвращает отфильтрованный список объект по поисковым словам.
+ * @return {Object[]} - Возвращает отфильтрованный список объект по поисковым словам.
  */
 export const searchByKeys = (payload: SearchOptions = {}): Record<string, any>[] => {
   const search: string = payload.search ?? '';
@@ -1171,18 +1240,20 @@ export type ClipboardActions = {
   paste: boolean;
 };
 
-// Проверка поддержки браузером копирования/вставки
+/**
+ * Проверка поддержки браузером копирования/вставки
+ */
 export const checkClipboardFunctionality = async (): Promise<ClipboardActions> => {
   const actions: ClipboardActions = {
     copy: false,
     paste: false,
   };
 
-  if (!window.navigator?.clipboard) {
+  if (!globalThis.navigator?.clipboard) {
     return actions;
   }
 
-  const { clipboard = {}, permissions = {} } = window.navigator;
+  const { clipboard = {}, permissions = {} } = globalThis.navigator;
 
   // Проверяем доступность функционала копирования в браузере
   actions.copy = 'writeText' in clipboard;
@@ -1195,7 +1266,7 @@ export const checkClipboardFunctionality = async (): Promise<ClipboardActions> =
         name: <PermissionName>'clipboard-read',
       });
 
-      if (['granted', 'prompt'].some((allowedState: string): boolean => allowedState === state)) {
+      if (['granted', 'prompt'].includes(state)) {
         actions.paste = true;
       }
     } catch (error) {
@@ -1206,9 +1277,11 @@ export const checkClipboardFunctionality = async (): Promise<ClipboardActions> =
   return actions;
 };
 
-// Получение UTM-меток из поисковой строки
+/**
+ * Получение UTM-меток из поисковой строки
+ */
 export const getUTMLabels = (prefix: string = 'utm_'): Record<string, any> | null => {
-  const queryString: string = window.location.search;
+  const queryString: string = globalThis.location.search;
 
   const data: Record<string, any> = {};
 
