@@ -30,12 +30,12 @@
   },
   "devDependencies": {
     "@swc/cli": "^0.8.1",
-    "@swc/core": "^1.15.30",
-    "@vitest/coverage-v8": "^4.1.4",
+    "@swc/core": "^1.15.32",
+    "@vitest/coverage-v8": "^4.1.5",
     "happy-dom": "^20.9.0",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.4"
+    "vitest": "^4.1.5"
   },
   "engines": {
     "node": ">= 18"
