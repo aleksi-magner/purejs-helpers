@@ -414,38 +414,27 @@ export const dateToDateShort = (date: Date, timeZone: string = 'Europe/Moscow'):
 /**
  * Преобразование ISO даты в формат DD.MM.YYYY
  * @param {string} ISODate - Дата в формате ISO
- * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
  * @return {string}
  *
  * @example
  * ISOToDateFormat('1979-12-03'); // '03.12.1979'
  * ISOToDateFormat('2022-04-26T21:06:06+05:00'); // '26.04.2022'
  */
-export const ISOToDateFormat = (ISODate: string, timeZone: string = 'Europe/Moscow'): string => {
+export const ISOToDateFormat = (ISODate: string): string => {
   const invalid: boolean = [!ISODate, getType(ISODate) !== 'String'].some(Boolean);
 
   if (invalid) {
     return '';
   }
 
-  const datePattern: RegExp = /^(\d{4})-(\d{1,2})-(\d{1,2})/; // 'YYYY-MM-DD'
-  const ISODateFormat = datePattern.exec(ISODate)?.at(0);
+  const datePattern: RegExp = /^(\d{4})-(\d{2})-(\d{2})/; // 'YYYY-MM-DD'
+  const ISODateFormat: string | undefined = datePattern.exec(ISODate)?.at(0);
 
   if (!ISODateFormat) {
     return '';
   }
 
-  const options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  };
-
-  if (timeZone) {
-    options.timeZone = timeZone;
-  }
-
-  return new Intl.DateTimeFormat(locale, options).format(new Date(ISODate));
+  return ISODateFormat.split('-').reverse().join('.');
 };
 
 /**

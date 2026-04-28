@@ -584,43 +584,43 @@ describe('helpers', () => {
 
   const ISOToDateFormatCases = [
     {
-      params: [undefined],
+      param: undefined,
       expected: '',
     },
     {
-      params: [null],
+      param: null,
       expected: '',
     },
     {
-      params: [''],
+      param: '',
       expected: '',
     },
     {
-      params: [42],
+      param: 42,
       expected: '',
     },
     {
-      params: ['42'],
+      param: '42',
       expected: '',
     },
     {
-      params: ['2022-04-26'],
+      param: '2022-04-26',
       expected: '26.04.2022',
     },
     {
-      params: ['2022-04-26T21:06:06+05:00'],
+      param: '2022-04-26T21:06:06+05:00',
       expected: '26.04.2022',
     },
     {
-      params: ['2022-04-26T21:06:06+05:00', ''],
+      param: '2022-04-26T21:06:06+05:00',
       expected: '26.04.2022',
     },
   ];
 
   test.each(ISOToDateFormatCases)('ISOToDateFormat', payload => {
-    const { params, expected } = payload;
+    const { param, expected } = payload;
 
-    expect(ISOToDateFormat(...params)).toBe(expected);
+    expect(ISOToDateFormat(param)).toBe(expected);
   });
 
   describe('Check dateTime', () => {
