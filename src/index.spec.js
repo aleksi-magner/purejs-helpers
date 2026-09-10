@@ -1,16 +1,13 @@
 import { vi, describe, test, expect } from 'vitest';
 
 import {
-  locale,
   MILLISECONDS_IN_DAY,
   getEnvironment,
-  isKZ,
   cookie,
   getType,
   leadingZero,
   currencyMask,
   wordEndings,
-  distanceFormat,
   bytesToSize,
   dateIsValid,
   toISODate,
@@ -20,26 +17,18 @@ import {
   dateToDateLong,
   dateToHoursMinutes,
   minutesToHoursMinutes,
-  getMoscowTime,
   weekOfYear,
   weekNumberToDate,
   maskIt,
   convertFileToBase64,
-  shortName,
   removeObjectKeys,
   deepClone,
   memo,
   fuzzySearch,
   searchByKeys,
-  checkClipboardFunctionality,
-  getUTMLabels,
 } from './index';
 
 describe('helpers', () => {
-  test('locale', () => {
-    expect(locale).toBe('ru-RU');
-  });
-
   test('MILLISECONDS_IN_DAY', () => {
     expect(MILLISECONDS_IN_DAY).toBe(86400000);
   });
@@ -62,7 +51,7 @@ describe('helpers', () => {
       },
     },
     {
-      url: 'https://server.verme.ru/',
+      url: 'https://server.somename.ru/',
       expected: {
         server: 'production',
         isLocal: false,
@@ -70,7 +59,7 @@ describe('helpers', () => {
       },
     },
     {
-      url: 'https://server.verme.kz/',
+      url: 'https://server.somename.kz/',
       expected: {
         server: 'production',
         isLocal: false,
@@ -78,7 +67,7 @@ describe('helpers', () => {
       },
     },
     {
-      url: 'https://server-dev.verme.ru/',
+      url: 'https://server-dev.somename.ru/',
       expected: {
         server: 'dev',
         isLocal: false,
@@ -86,7 +75,7 @@ describe('helpers', () => {
       },
     },
     {
-      url: 'https://server-demo.verme.ru/',
+      url: 'https://server-demo.somename.ru/',
       expected: {
         server: 'demo',
         isLocal: false,
@@ -94,7 +83,7 @@ describe('helpers', () => {
       },
     },
     {
-      url: 'https://server-rc.verme.ru/',
+      url: 'https://server-rc.somename.ru/',
       expected: {
         server: 'rc',
         isLocal: false,
@@ -102,7 +91,7 @@ describe('helpers', () => {
       },
     },
     {
-      url: 'https://server-test.verme.ru/',
+      url: 'https://server-test.somename.ru/',
       expected: {
         server: 'test',
         isLocal: false,
@@ -114,29 +103,21 @@ describe('helpers', () => {
   test.each(envCases)('getEnvironment', ({ url, expected }) => {
     window.location.assign(url);
 
-    expect(getEnvironment('verme')).toEqual(expected);
+    expect(getEnvironment('somename')).toEqual(expected);
 
     window.location.assign('about:blank');
   });
 
   const kzCases = [
     {
-      url: 'https://server.verme.ru/',
+      url: 'https://server.somename.ru/',
       expected: false,
     },
     {
-      url: 'https://server.verme.kz/',
+      url: 'https://server.somename.kz/',
       expected: true,
     },
   ];
-
-  test.each(kzCases)('isKZ', ({ url, expected }) => {
-    window.location.assign(url);
-
-    expect(isKZ()).toBe(expected);
-
-    window.location.assign('about:blank');
-  });
 
   test('cookie', () => {
     window.location.assign('http://localhost:8080/');
@@ -330,48 +311,37 @@ describe('helpers', () => {
     expect(leadingZero(param)).toBe(expected);
   });
 
-  describe('Check currencyMask', () => {
-    const currencyMaskCases = [
-      {
-        params: [undefined],
-        expected: '0 ₽',
-      },
-      {
-        params: [null],
-        expected: '0 ₽',
-      },
-      {
-        params: [0],
-        expected: '0 ₽',
-      },
-      {
-        params: [1840],
-        expected: '1 840 ₽',
-      },
-      {
-        params: [1840.57],
-        expected: '1 840,6 ₽',
-      },
-      {
-        params: [1840.54, 2],
-        expected: '1 840,54 ₽',
-      },
-    ];
+  const currencyMaskCases = [
+    {
+      params: [undefined],
+      expected: '0 ₽',
+    },
+    {
+      params: [null],
+      expected: '0 ₽',
+    },
+    {
+      params: [0],
+      expected: '0 ₽',
+    },
+    {
+      params: [1840],
+      expected: '1 840 ₽',
+    },
+    {
+      params: [1840.57],
+      expected: '1 840,6 ₽',
+    },
+    {
+      params: [1840.54, 2],
+      expected: '1 840,54 ₽',
+    },
+  ];
 
-    test.each(currencyMaskCases)('RU server', payload => {
-      const { params, expected } = payload;
+  test.each(currencyMaskCases)('Check currencyMask', payload => {
+    const { params, expected } = payload;
 
-      expect(currencyMask(...params)).toBe(expected);
-    });
-
-    test('KZ server', () => {
-      window.location.assign('https://test.verme.kz/');
-
-      expect(currencyMask(1840)).toBe('1 840 ₸');
-      expect(currencyMask(1840.54, 2)).toBe('1 840,54 ₸');
-
-      window.location.assign('about:blank');
-    });
+    expect(currencyMask(...params)).toBe(expected);
   });
 
   const wordEndingsMaskCases = [
@@ -397,47 +367,6 @@ describe('helpers', () => {
     const { params, expected } = payload;
 
     expect(wordEndings(...params)).toBe(expected);
-  });
-
-  const distanceFormatCases = [
-    {
-      params: [undefined],
-      expected: '',
-    },
-    {
-      params: [null],
-      expected: '',
-    },
-    {
-      params: [''],
-      expected: '',
-    },
-    {
-      params: [42],
-      expected: '42 метра',
-    },
-    {
-      params: [42, true],
-      expected: '42 м',
-    },
-    {
-      params: ['420', !!{}],
-      expected: '420 м',
-    },
-    {
-      params: [1042],
-      expected: '1 км',
-    },
-    {
-      params: [1420],
-      expected: '1.4 км',
-    },
-  ];
-
-  test.each(distanceFormatCases)('distanceFormat', payload => {
-    const { params, expected } = payload;
-
-    expect(distanceFormat(...params)).toBe(expected);
   });
 
   const bytesToSizeCases = [
@@ -844,47 +773,6 @@ describe('helpers', () => {
 
     expect(minutesToHoursMinutes(minutes)).toBe(time);
     expect(minutesToHoursMinutes(minutes, true)).toBe(byParts);
-  });
-
-  const getMoscowTimeCases = [
-    {
-      param: '2022-05-01T09:30:00Z',
-      expected: {
-        hour: '12',
-        minute: '30',
-        timestamp: 1651397400000,
-      },
-    },
-    {
-      param: '2022-04-26T01:06:06+03:00',
-      expected: {
-        hour: '01',
-        minute: '06',
-        timestamp: 1650924366000,
-      },
-    },
-    {
-      param: '2022-05-01',
-      expected: {
-        hour: '03',
-        minute: '00',
-        timestamp: 1651363200000,
-      },
-    },
-    {
-      param: null,
-      expected: {
-        hour: '00',
-        minute: '00',
-        timestamp: 0,
-      },
-    },
-  ];
-
-  test.each(getMoscowTimeCases)('getMoscowTime', payload => {
-    const { param, expected } = payload;
-
-    expect(getMoscowTime(param)).toEqual(expected);
   });
 
   describe('Check weekOfYear', () => {
@@ -1329,43 +1217,6 @@ describe('helpers', () => {
     const emptyFile = await convertFileToBase64(null);
 
     expect(emptyFile).toBe('');
-  });
-
-  const shortNameCases = [
-    {
-      param: undefined,
-      expected: '――',
-    },
-    {
-      param: null,
-      expected: '――',
-    },
-    {
-      param: '',
-      expected: '――',
-    },
-    {
-      param: '42',
-      expected: '――',
-    },
-    {
-      param: 'Светлова Александра Андреевна',
-      expected: 'СвеАА',
-    },
-    {
-      param: 'Бекр Фуркад',
-      expected: 'БекрФ',
-    },
-    {
-      param: 'василий',
-      expected: 'Васил',
-    },
-  ];
-
-  test.each(shortNameCases)('shortName', payload => {
-    const { param, expected } = payload;
-
-    expect(shortName(param)).toBe(expected);
   });
 
   const removeObjectKeysCases = [
@@ -1961,192 +1812,5 @@ describe('helpers', () => {
 
       expect(searchByKeys(param)).toEqual(expected);
     });
-  });
-
-  describe('Check Clipboard', () => {
-    const copy = value => Promise.resolve(value);
-
-    const paste = type => {
-      if (type === 'success') {
-        return () => Promise.resolve('Text from clipboard');
-      }
-
-      return () => Promise.reject(new Error('read text don`t support'));
-    };
-
-    const query = async ({ name = '' }) =>
-      new Promise((resolve, reject) => {
-        console.log('Query func', name);
-
-        if (name === 'clipboard-read') {
-          return resolve({
-            name: 'clipboard_read',
-            state: 'prompt',
-            onchange: null,
-          });
-        }
-
-        return reject(new Error('this name value don`t support'));
-      });
-
-    const cases = [
-      {
-        handleNavigator: {},
-        expected: {
-          isCanCopy: false,
-          isCanPaste: false,
-        },
-      },
-      {
-        handleNavigator: {
-          clipboard: {},
-          permissions: { query },
-        },
-        expected: {
-          isCanCopy: false,
-          isCanPaste: false,
-        },
-      },
-      {
-        handleNavigator: {
-          clipboard: {
-            writeText: copy,
-            readText: paste('error'),
-          },
-          permissions: {
-            query: query.bind(null, { name: 'any' }),
-          },
-        },
-        expected: {
-          isCanCopy: true,
-          isCanPaste: false,
-        },
-      },
-      {
-        handleNavigator: {
-          clipboard: {
-            writeText: copy,
-            readText: paste('success'),
-          },
-          permissions: {
-            query: query.bind(null, { name: 'any' }),
-          },
-        },
-        expected: {
-          isCanCopy: true,
-          isCanPaste: false,
-        },
-      },
-      {
-        handleNavigator: {
-          clipboard: {
-            writeText: copy,
-            readText: paste('success'),
-          },
-          permissions: { query },
-        },
-        expected: {
-          isCanCopy: true,
-          isCanPaste: true,
-        },
-      },
-      {
-        handleNavigator: {
-          clipboard: {
-            writeText: copy,
-            readText: paste('success'),
-          },
-          permissions: {
-            async query({ name = '' }) {
-              return Promise.resolve({
-                name: 'clipboard_read',
-                state: 'wrong-state',
-                onchange: null,
-              });
-            },
-          },
-        },
-        expected: {
-          isCanCopy: true,
-          isCanPaste: false,
-        },
-      },
-    ];
-
-    test.each(cases)('checkClipboardFunctionality', async payload => {
-      const { handleNavigator, expected } = payload;
-
-      const { navigator } = window;
-
-      delete window.navigator;
-
-      window.navigator = handleNavigator;
-
-      const { error } = console;
-
-      console.error = vi.fn();
-
-      const { copy, paste } = await checkClipboardFunctionality();
-
-      expect(copy).toBe(expected.isCanCopy);
-      expect(paste).toBe(expected.isCanPaste);
-
-      window.navigator = navigator;
-      console.error = error;
-    });
-  });
-
-  const utmCases = [
-    {
-      locationSearch: '',
-      expected: null,
-    },
-    {
-      locationSearch: '?',
-      expected: null,
-    },
-    {
-      locationSearch: '?utm_',
-      expected: { '': '' },
-    },
-    {
-      locationSearch: '?utm_promocode=',
-      expected: { promocode: '' },
-    },
-    {
-      locationSearch: '?utm_promocode=bpdigital',
-      expected: { promocode: 'bpdigital' },
-    },
-    {
-      locationSearch: '?utm_promocode=bpdigital',
-      expected: { promocode: 'bpdigital' },
-    },
-    {
-      locationSearch: '?utm_promocode=bpdigital   ',
-      expected: { promocode: 'bpdigital' },
-    },
-    {
-      locationSearch: '?utm_promocode=bpdigital&id=42&shift=174',
-      expected: { promocode: 'bpdigital' },
-    },
-    {
-      locationSearch: '?utm_key1=key1&utm_key2=key2',
-      expected: {
-        key1: 'key1',
-        key2: 'key2',
-      },
-    },
-  ];
-
-  test.each(utmCases)('getUTMLabels', payload => {
-    const { locationSearch, expected } = payload;
-
-    window.location.assign(`https://shifts.verme.ru/${locationSearch}`);
-
-    const labels = getUTMLabels();
-
-    expect(labels).toEqual(expected);
-
-    window.location.assign('about:blank');
   });
 });

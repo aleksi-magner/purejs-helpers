@@ -1,9 +1,4 @@
 /**
- * Локализация по умолчанию
- */
-export const locale: string = 'ru-RU';
-
-/**
  * Количество миллисекунд в сутках
  */
 export const MILLISECONDS_IN_DAY = 86400000; // 24 * 60 * 60 * 1000
@@ -20,8 +15,8 @@ export type Environment = {
  * @return {Environment}
  *
  * @example
- * https://any-verme.ru
- * getEnvironment('verme')
+ * https://any-domain.ru
+ * getEnvironment('domain')
  * // { server: 'any', isLocal: false, mode: 'development' }
  */
 export const getEnvironment = (name: string = ''): Environment => {
@@ -42,16 +37,6 @@ export const getEnvironment = (name: string = ''): Environment => {
     mode: isLocalServer || environment !== 'production' ? 'development' : 'production',
   };
 };
-
-/**
- * Определение казахского домена
- * @return {boolean}
- *
- * @example
- * https://any-domain.kz
- * isKZ() // true
- */
-export const isKZ = (): boolean => globalThis.location.hostname.includes('.kz');
 
 export type CookieCreateOptions = {
   Domain?: string;
@@ -250,15 +235,11 @@ export const leadingZero = (value: string | number): string => {
  * currencyMask(1840); // '1 840 ₽'
  */
 export const currencyMask = (value: number | undefined | null, fraction: number = 1): string => {
-  const KZ: boolean = isKZ();
-  const currencyLocale: string = KZ ? 'ru-KZ' : 'ru-RU';
-  const currency: string = KZ ? 'KZT' : 'RUB';
-
   const number: number = !value || Number.isNaN(value) ? 0 : value;
 
-  return new Intl.NumberFormat(currencyLocale, {
+  return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
-    currency,
+    currency: 'RUB',
     minimumFractionDigits: 0,
     maximumFractionDigits: fraction,
   }).format(number);
@@ -289,36 +270,6 @@ export const wordEndings = (amount: number | string, titles: [string, string, st
   }
 
   return [formatNumber, word].join(' ');
-};
-
-/**
- * Преобразование числа в расстояние
- * @param {(string | number)} distance - Дистанция
- * @param {boolean} [short=false] - Использовать короткий формат
- * @return {string}
- *
- * @example
- * distanceFormat(42); // '42 метра'
- * distanceFormat(42, true); // '42 м'
- * distanceFormat(1042); // '1.42 км'
- */
-export const distanceFormat = (distance: number | string, short: boolean = false): string => {
-  const type: string = getType(distance);
-  const validType: boolean = ['Number', 'String'].includes(type);
-
-  if (!distance || !validType) {
-    return '';
-  }
-
-  const validDistance: number = Number.parseFloat(String(distance));
-
-  if (validDistance > 900) {
-    return `${Math.round((validDistance / 1000) * 10) / 10} км`;
-  } else if (short) {
-    return `${new Intl.NumberFormat(locale).format(validDistance)} м`;
-  }
-
-  return wordEndings(validDistance, ['метр', 'метра', 'метров']);
 };
 
 /**
@@ -408,7 +359,7 @@ export const dateToDateShort = (date: Date, timeZone: string = 'Europe/Moscow'):
     options.timeZone = timeZone;
   }
 
-  return new Intl.DateTimeFormat(locale, options).format(date);
+  return new Intl.DateTimeFormat('ru-RU', options).format(date);
 };
 
 /**
@@ -464,7 +415,7 @@ export const dateTime = (date: Date, timeZone: string = 'Europe/Moscow'): string
     options.timeZone = timeZone;
   }
 
-  return new Intl.DateTimeFormat(locale, options).format(date);
+  return new Intl.DateTimeFormat('ru-RU', options).format(date);
 };
 
 export type DateToDateLong = {
@@ -531,7 +482,7 @@ export const dateToDateLong = (payload: DateToDateLong = {}): string => {
     options.timeZone = timeZone;
   }
 
-  const longDate: string = new Intl.DateTimeFormat(locale, options).format(<Date>date);
+  const longDate: string = new Intl.DateTimeFormat('ru-RU', options).format(<Date>date);
 
   return showYear ? longDate.slice(0, -3) : longDate;
 };
@@ -560,7 +511,7 @@ export const dateToHoursMinutes = (date: Date, timeZone: string = 'Europe/Moscow
     options.timeZone = timeZone;
   }
 
-  return new Intl.DateTimeFormat(locale, options).format(date);
+  return new Intl.DateTimeFormat('ru-RU', options).format(date);
 };
 
 /**
@@ -604,41 +555,6 @@ export type HourTimestamp = {
   hour: string;
   minute: string;
   timestamp: number;
-};
-
-/**
- * Получение объекта с московским временем из даты
- * @param {string} dateString - Дата в формате ISO
- * @return {HourTimestamp}
- *
- * @example
- * getMoscowTime('2022-05-02T08:00:00Z');
- * // { hour: '12', minute: '00', timestamp: 1643041320000 }
- */
-export const getMoscowTime = (dateString: string): HourTimestamp => {
-  const date: Date = new Date(dateString);
-
-  if (!dateString || !dateIsValid(date)) {
-    return {
-      hour: '00',
-      minute: '00',
-      timestamp: 0,
-    };
-  }
-
-  const offset: 3 = +3;
-
-  const newDate: string = new Date(date.getTime() + offset * 3600 * 1000)
-    .toUTCString()
-    .replace(/ GMT$/, '');
-
-  const localTime: Date = new Date(newDate);
-
-  return {
-    hour: leadingZero(localTime.getHours()),
-    minute: leadingZero(localTime.getMinutes()),
-    timestamp: localTime.getTime(),
-  };
 };
 
 /**
@@ -704,6 +620,7 @@ const maskItHelpers: MaskHelpers = {
     x: 'x',
     ' ': String.raw`\s`,
     '+': String.raw`\+`,
+    ':': String.raw`\:`,
     '-': '-',
     _: '_',
     '/': '/',
@@ -859,47 +776,6 @@ export const convertFileToBase64 = (file: File): Promise<string> => {
 
     reader.readAsDataURL(file);
   });
-};
-
-/**
- * Сокращение ФИО до формата ФффИО или ФфффИ (если нет отчества)
- * @param {string} fullName - ФИО
- * @return {string}
- *
- * @example
- * shortName('Светлова Александра Андреевна'); // 'СвеАА'
- * shortName('Бекр Фуркад'); // 'БекрФ'
- */
-export const shortName = (fullName: string): string => {
-  const invalid: boolean = [!fullName, getType(fullName) !== 'String'].some(Boolean);
-
-  if (invalid) {
-    return '――';
-  }
-
-  const splitFullName: RegExpMatchArray | [] = fullName.match(/[^\s\d_.,'"`;:]+/gi) ?? [];
-
-  const [surname, firstname, patronymic] = splitFullName.map((item: string) =>
-    [item.charAt(0).toUpperCase(), item.slice(1)].join(''),
-  );
-
-  let limit;
-
-  if (patronymic) {
-    limit = 3;
-  } else if (firstname) {
-    limit = 4;
-  } else {
-    limit = 5;
-  }
-
-  const shortSurname: string = surname ? surname.slice(0, limit) : '';
-  const firstnameInitials: string = firstname ? firstname.slice(0, 1) : '';
-  const patronymicInitials: string = patronymic ? patronymic.slice(0, 1) : '';
-
-  const name: string = [shortSurname, firstnameInitials, patronymicInitials].join('');
-
-  return name || '――';
 };
 
 /**
@@ -1222,67 +1098,4 @@ export const searchByKeys = (payload: SearchOptions = {}): Record<string, any>[]
   // Иначе оставляем весь найденный список.
   // Вывод отдельных приоритетов, кроме точного соответствия не показывает всю картину
   return result;
-};
-
-export type ClipboardActions = {
-  copy: boolean;
-  paste: boolean;
-};
-
-/**
- * Проверка поддержки браузером копирования/вставки
- */
-export const checkClipboardFunctionality = async (): Promise<ClipboardActions> => {
-  const actions: ClipboardActions = {
-    copy: false,
-    paste: false,
-  };
-
-  if (!globalThis.navigator?.clipboard) {
-    return actions;
-  }
-
-  const { clipboard = {}, permissions = {} } = globalThis.navigator;
-
-  // Проверяем доступность функционала копирования в браузере
-  actions.copy = 'writeText' in clipboard;
-
-  // Проверяем доступность функционала вставки в браузере
-  if (['query' in permissions, 'readText' in clipboard].every(Boolean)) {
-    try {
-      // Проверяем включённое разрешение в пользовательских настройках браузера
-      const { state } = await (<Permissions>permissions).query({
-        name: <PermissionName>'clipboard-read',
-      });
-
-      if (['granted', 'prompt'].includes(state)) {
-        actions.paste = true;
-      }
-    } catch (error) {
-      console.error(`Check paste filed. ${(<Error>error).message}`);
-    }
-  }
-
-  return actions;
-};
-
-/**
- * Получение UTM-меток из поисковой строки
- */
-export const getUTMLabels = (prefix: string = 'utm_'): Record<string, any> | null => {
-  const queryString: string = globalThis.location.search;
-
-  const data: Record<string, any> = {};
-
-  if (queryString.includes(prefix)) {
-    const urlParams: URLSearchParams = new URLSearchParams(queryString);
-
-    urlParams.forEach((value: string, key: string): void => {
-      if (key.includes(prefix)) {
-        data[key.replace(prefix, '')] = value.trim();
-      }
-    });
-  }
-
-  return Object.keys(data).length ? data : null;
 };
