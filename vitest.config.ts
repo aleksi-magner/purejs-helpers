@@ -8,7 +8,6 @@ export default defineConfig({
   test: {
     root: fileURLToPath(new URL('./', metaURL)),
     dir: './src',
-    include: ['*.spec.{js,ts}'],
     environment: 'happy-dom',
     cache: false,
     isolate: true,

@@ -30,14 +30,14 @@
   },
   "devDependencies": {
     "@swc/cli": "^0.8.1",
-    "@swc/core": "^1.15.32",
-    "@vitest/coverage-v8": "^4.1.5",
-    "happy-dom": "^20.9.0",
-    "prettier": "^3.8.3",
+    "@swc/core": "^1.16.2",
+    "@vitest/coverage-v8": "^5.0.0",
+    "happy-dom": "^20.14.3",
+    "prettier": "^3.9.6",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.5"
+    "vitest": "^5.0.0"
   },
   "engines": {
-    "node": ">= 18"
+    "node": ">= 22"
   }
 }
