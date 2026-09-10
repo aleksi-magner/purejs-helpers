@@ -14,14 +14,6 @@ yarn add purejs-helpers
 
 ## Использование
 
-### Получение языка локализации по умолчанию
-
-```javascript
-import { locale } from 'purejs-helpers';
-
-console.log(locale); // 'ru-RU'
-```
-
 ### Определение окружения по домену
 
 ```javascript
@@ -29,15 +21,6 @@ import { getEnvironment } from 'purejs-helpers';
 
 // http://localhost:8080/
 getEnvironment(); // { server: 'production', mode: 'development' }
-```
-
-### Определение казахского домена
-
-```javascript
-import { isKZ } from 'purejs-helpers';
-
-// https://any-domain.kz
-isKZ(); // true
 ```
 
 ### Работа с Cookie
@@ -79,6 +62,27 @@ getType('string'); // 'String'
 getType(''); // 'String'
 getType(null); // 'Null'
 getType(undefined); // 'Undefined'
+```
+
+### Проверка значения на тип объекта
+
+```javascript
+import { isObject } from 'purejs-helpers';
+
+isObject(); // false
+isObject([]); // false
+isObject(new Date()) // false
+isObject(() => {}); // false
+isObject(function() {}); // false
+isObject(Promise.resolve()); // false
+isObject(new Event('any')); // false
+isObject(42.13); // false
+isObject('string'); // false
+isObject(''); // false
+isObject(null); // false
+isObject(undefined); // false
+isObject({}); // true
+isObject(new Proxy({}, {})); // true
 ```
 
 ### Добавление ведущего нуля
@@ -190,15 +194,6 @@ minutesToHoursMinutes(480); // '08:00'
 minutesToHoursMinutes(-480); // '-08:00'
 ```
 
-### Получение объекта с московским временем из даты
-
-```javascript
-import { getMoscowTime } from 'purejs-helpers';
-
-// { hour: '12', minute: '00', timestamp: 1643041320000 }
-getMoscowTime('2022-05-02T08:00:00Z');
-```
-
 ### Получение номера недели в году
 
 ```javascript
@@ -235,16 +230,6 @@ import { wordEndings } from 'purejs-helpers';
 wordEndings(17, ['метр', 'метра', 'метров']); // '17 метров'
 ```
 
-### Преобразование числа в расстояние
-
-```javascript
-import { distanceFormat } from 'purejs-helpers';
-
-distanceFormat(42); // '42 метра'
-distanceFormat(42, true); // '42 м'
-distanceFormat(1042); // '1.42 км'
-```
-
 ### Получение преобразованного размера файла
 
 ```javascript
@@ -259,16 +244,6 @@ bytesToSize(40031); // '39.09 кБ'
 import { convertFileToBase64 } from 'purejs-helpers';
 
 convertFileToBase64(<File>); // '<Base64>'
-```
-
-### Сокращение ФИО до формата ФффИО или ФфффИ (если нет отчества)
-
-```javascript
-import { shortName } from 'purejs-helpers';
-
-shortName('Светлова Александра Андреевна'); // 'СвеАА'
-shortName('Бекр фуркад'); // 'БекрФ'
-shortName('cветлова'); // 'Светл'
 ```
 
 ### Удаление ключей из объекта с клонированием
@@ -359,23 +334,6 @@ searchByKeys({
   keys: ['title'],
   enableFuzzySearch: true,
 });
-```
-
-### Проверка поддержки браузером копирования/вставки
-
-```javascript
-import { checkClipboardFunctionality } from 'purejs-helpers';
-
-await checkClipboardFunctionality(); // { copy: true, paste: true }
-```
-
-### Получение UTM-меток из поисковой строки
-
-```javascript
-import { getUTMLabels } from 'purejs-helpers';
-
-// https://any-domain?utm_any=value
-getUTMLabels(); // { any: 'value' }
 ```
 
 ### Good Boy License

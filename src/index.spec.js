@@ -5,6 +5,7 @@ import {
   getEnvironment,
   cookie,
   getType,
+  isObject,
   leadingZero,
   currencyMask,
   wordEndings,
@@ -280,6 +281,71 @@ describe('helpers', () => {
     const { param, expected } = payload;
 
     expect(getType(param)).toBe(expected);
+  });
+
+  const isObjectCases = [
+    {
+      param: undefined,
+      expected: false,
+    },
+    {
+      param: null,
+      expected: false,
+    },
+    {
+      param: '',
+      expected: false,
+    },
+    {
+      param: 'string',
+      expected: false,
+    },
+    {
+      param: 42,
+      expected: false,
+    },
+    {
+      param: 42.13,
+      expected: false,
+    },
+    {
+      param: [],
+      expected: false,
+    },
+    {
+      param: new Date(),
+      expected: false,
+    },
+    {
+      param: () => {},
+      expected: false,
+    },
+    {
+      param: function () {},
+      expected: false,
+    },
+    {
+      param: Promise.resolve(),
+      expected: false,
+    },
+    {
+      param: new Event('any'),
+      expected: false,
+    },
+    {
+      param: {},
+      expected: true,
+    },
+    {
+      param: new Proxy({}, {}),
+      expected: true,
+    },
+  ];
+
+  test.each(isObjectCases)('isObject', payload => {
+    const { param, expected } = payload;
+
+    expect(isObject(param)).toBe(expected);
   });
 
   const leadingZeroCases = [

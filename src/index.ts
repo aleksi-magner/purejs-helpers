@@ -1,7 +1,7 @@
 /**
  * Количество миллисекунд в сутках
  */
-export const MILLISECONDS_IN_DAY = 86400000; // 24 * 60 * 60 * 1000
+export const MILLISECONDS_IN_DAY = 86_400_000; // 24 * 60 * 60 * 1000
 
 export type Environment = {
   server: string;
@@ -208,6 +208,13 @@ export const getType = (value?: any): string => {
     }
   }
 };
+
+/**
+ * Проверка значения на тип объекта
+ * @param [value] - Проверяемое значение
+ * @return {boolean}
+ */
+export const isObject = (value?: any): boolean => value?.constructor?.name === 'Object';
 
 /**
  * Добавление ведущего нуля
