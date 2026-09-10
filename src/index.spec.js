@@ -10,7 +10,7 @@ import {
   currencyMask,
   wordEndings,
   bytesToSize,
-  dateIsValid,
+  isValidDate,
   toISODate,
   dateToDateShort,
   ISOToDateFormat,
@@ -484,7 +484,7 @@ describe('helpers', () => {
     expect(bytesToSize(param)).toBe(expected);
   });
 
-  const dateIsValidCases = [
+  const isValidDateCases = [
     {
       param: undefined,
       expected: false,
@@ -503,10 +503,10 @@ describe('helpers', () => {
     },
   ];
 
-  test.each(dateIsValidCases)('dateIsValid', payload => {
+  test.each(isValidDateCases)('isValidDate', payload => {
     const { param, expected } = payload;
 
-    expect(dateIsValid(param)).toBe(expected);
+    expect(isValidDate(param)).toBe(expected);
   });
 
   const toISODateCases = [

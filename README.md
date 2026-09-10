@@ -107,12 +107,12 @@ currencyMask(1840.621, 3); // '1 840.621 ₽'
 ### Проверка объекта даты на валидность
 
 ```javascript
-import { dateIsValid } from 'purejs-helpers';
+import { isValidDate } from 'purejs-helpers';
 
-dateIsValid(null); // false
-dateIsValid(new Date()); // true
-dateIsValid(new Date('9999-99-99')); // false
-dateIsValid(new Date('2023-03-16')); // true
+isValidDate(null); // false
+isValidDate(new Date()); // true
+isValidDate(new Date('9999-99-99')); // false
+isValidDate(new Date('2023-03-16')); // true
 ```
 
 ### Преобразование даты в ISO формат

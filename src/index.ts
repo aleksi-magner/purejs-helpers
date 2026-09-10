@@ -312,7 +312,7 @@ export const bytesToSize = (bytes: number): string => {
  * @param {Date} [date] - Дата
  * @return {boolean}
  */
-export const dateIsValid = (date?: Date): boolean => {
+export const isValidDate = (date?: Date): boolean => {
   if (!date) {
     return false;
   }
@@ -329,7 +329,7 @@ export const dateIsValid = (date?: Date): boolean => {
  * toISODate(new Date('2020-10-21T08:45:00')); // '2020-10-21'
  */
 export const toISODate = (date: Date): string => {
-  if (!dateIsValid(date)) {
+  if (!isValidDate(date)) {
     return '';
   }
 
@@ -352,7 +352,7 @@ export const toISODate = (date: Date): string => {
  * dateToDateShort(new Date('2020-10-21T08:45:00')); // '21.10.2020'
  */
 export const dateToDateShort = (date: Date, timeZone: string = 'Europe/Moscow'): string => {
-  if (!dateIsValid(date)) {
+  if (!isValidDate(date)) {
     return '';
   }
 
@@ -405,7 +405,7 @@ export const ISOToDateFormat = (ISODate: string): string => {
  * dateTime(new Date('2020-10-21T08:45:00')); // '21.10.2020, 08:45'
  */
 export const dateTime = (date: Date, timeZone: string = 'Europe/Moscow'): string => {
-  if (!dateIsValid(date)) {
+  if (!isValidDate(date)) {
     return '';
   }
 
@@ -463,7 +463,7 @@ export type DateToDateLong = {
  * });
  */
 export const dateToDateLong = (payload: DateToDateLong = {}): string => {
-  if (!dateIsValid(payload.date)) {
+  if (!isValidDate(payload.date)) {
     return '';
   }
 
@@ -504,7 +504,7 @@ export const dateToDateLong = (payload: DateToDateLong = {}): string => {
  * dateToHoursMinutes(new Date('2020-10-21')); // '08:45'
  */
 export const dateToHoursMinutes = (date: Date, timeZone: string = 'Europe/Moscow'): string => {
-  if (!dateIsValid(date)) {
+  if (!isValidDate(date)) {
     return '00:00';
   }
 
@@ -573,7 +573,7 @@ export type HourTimestamp = {
  * weekOfYear(new Date('2020-10-21')); // 43
  */
 export const weekOfYear = (currentDate: Date = new Date()): number => {
-  if (!dateIsValid(currentDate)) {
+  if (!isValidDate(currentDate)) {
     return 0;
   }
 
