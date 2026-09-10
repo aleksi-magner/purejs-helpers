@@ -395,36 +395,6 @@ export const ISOToDateFormat = (ISODate: string): string => {
   return ISODateFormat.split('-').reverse().join('.');
 };
 
-/**
- * Преобразование даты в формат DD.MM.YYYY, HH:MM
- * @param {Date} date - Дата
- * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
- * @return {string}
- *
- * @example
- * dateTime(new Date('2020-10-21T08:45:00')); // '21.10.2020, 08:45'
- */
-export const dateTime = (date: Date, timeZone: string = 'Europe/Moscow'): string => {
-  if (!isValidDate(date)) {
-    return '';
-  }
-
-  const options: Intl.DateTimeFormatOptions = {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour12: false,
-    hour: 'numeric',
-    minute: '2-digit',
-  };
-
-  if (timeZone) {
-    options.timeZone = timeZone;
-  }
-
-  return new Intl.DateTimeFormat('ru-RU', options).format(date);
-};
-
 export type DateToDateLong = {
   date?: Date;
   showWeekDay?: boolean;
@@ -495,6 +465,36 @@ export const dateToDateLong = (payload: DateToDateLong = {}): string => {
 };
 
 /**
+ * Преобразование даты в формат DD.MM.YYYY, HH:MM
+ * @param {Date} date - Дата
+ * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @return {string}
+ *
+ * @example
+ * dateTime(new Date('2020-10-21T08:45:00')); // '21.10.2020, 08:45'
+ */
+export const dateTime = (date: Date, timeZone: string = 'Europe/Moscow'): string => {
+  if (!isValidDate(date)) {
+    return '';
+  }
+
+  const options: Intl.DateTimeFormatOptions = {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour12: false,
+    hour: 'numeric',
+    minute: '2-digit',
+  };
+
+  if (timeZone) {
+    options.timeZone = timeZone;
+  }
+
+  return new Intl.DateTimeFormat('ru-RU', options).format(date);
+};
+
+/**
  * Преобразование даты в формат HH:MM
  * @param {Date} date - Дата
  * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
@@ -528,7 +528,9 @@ export const dateToHoursMinutes = (date: Date, timeZone: string = 'Europe/Moscow
  * @return {string}
  *
  * @example
- * minutesToHoursMinutes(480); // '08:00'
+ * minutesToHoursMinutes(495); // '08:15'
+ * minutesToHoursMinutes(-495); // '-08:15'
+ * minutesToHoursMinutes(495, true); // '8 ч 15 мин'
  */
 export const minutesToHoursMinutes = (value: number, byParts: boolean = false): string => {
   const type: string = getType(value);
@@ -536,7 +538,6 @@ export const minutesToHoursMinutes = (value: number, byParts: boolean = false): 
   const number: number = invalid ? 0 : value;
 
   const absNumber: number = Math.abs(number);
-  const sign: string = number < 0 ? '-' : '';
 
   const hours: number = Math.floor(absNumber / 60);
   const minutes: number = absNumber % 60;
@@ -544,24 +545,55 @@ export const minutesToHoursMinutes = (value: number, byParts: boolean = false): 
   let time;
 
   if (byParts) {
-    if (hours && minutes) {
-      time = `${hours} ч. ${minutes} мин.`;
-    } else if (hours) {
-      time = wordEndings(hours, ['час', 'часа', 'часов']);
-    } else {
-      time = wordEndings(minutes, ['минута', 'минуты', 'минут']);
+    const parts = [];
+
+    if (hours) {
+      parts.push(`${hours} ч`);
     }
+
+    if (minutes || !hours) {
+      parts.push(`${minutes} мин`);
+    }
+
+    time = parts.join(' ');
   } else {
     time = [leadingZero(hours), leadingZero(minutes)].join(':');
   }
 
+  const sign: string = number < 0 ? '-' : '';
+
   return [sign, time].join('');
 };
 
-export type HourTimestamp = {
-  hour: string;
-  minute: string;
-  timestamp: number;
+export type HoursMinutes = {
+  hours: number;
+  minutes: number;
+};
+
+/**
+ * Разделение времени на часы и минуты.
+ * Если формат времени не верный, возвращаются нули
+ * @param {string} time - время в формате 'H:MM' или 'HH:MM'
+ * @returns {{ hours: number, minutes: number }}
+ */
+export const parseTime = (time: string): HoursMinutes => {
+  const regExp: RegExp = /^(\d{1,2}):(\d{2})$/; // 'H:MM' | 'HH:MM'
+
+  if (!time || !regExp.test(time)) {
+    return {
+      hours: 0,
+      minutes: 0,
+    };
+  }
+
+  const [hours, minutes]: number[] = time
+    .split(':')
+    .map((value: string): number => Number.parseInt(value));
+
+  return {
+    hours: hours as number,
+    minutes: minutes as number,
+  };
 };
 
 /**
@@ -619,7 +651,7 @@ type MaskHelpers = {
 };
 
 const maskItHelpers: MaskHelpers = {
-  special: /[\s-+/._{}()[\]]/,
+  special: /[\s-+/.:_{}()[\]]/,
   dictionary: {
     Z: '[A-Z]',
     9: String.raw`\d`,

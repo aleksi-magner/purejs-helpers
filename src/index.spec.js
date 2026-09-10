@@ -14,10 +14,11 @@ import {
   toISODate,
   dateToDateShort,
   ISOToDateFormat,
-  dateTime,
   dateToDateLong,
+  dateTime,
   dateToHoursMinutes,
   minutesToHoursMinutes,
+  parseTime,
   weekOfYear,
   weekNumberToDate,
   maskIt,
@@ -420,12 +421,16 @@ describe('helpers', () => {
       expected: '0 метров',
     },
     {
-      params: [17, ['метр', 'метра', 'метров']],
-      expected: '17 метров',
-    },
-    {
       params: ['1', ['метр', 'метра', 'метров']],
       expected: '1 метр',
+    },
+    {
+      params: [22, ['метр', 'метра', 'метров']],
+      expected: '22 метра',
+    },
+    {
+      params: [17, ['метр', 'метра', 'метров']],
+      expected: '17 метров',
     },
   ];
 
@@ -618,45 +623,6 @@ describe('helpers', () => {
     expect(ISOToDateFormat(param)).toBe(expected);
   });
 
-  describe('Check dateTime', () => {
-    const dateTimeCases = [
-      {
-        params: [undefined],
-        expected: '',
-      },
-      {
-        params: [null],
-        expected: '',
-      },
-      {
-        params: [''],
-        expected: '',
-      },
-      {
-        params: [new Date('2022-04-26T21:06:06.405296+03:00')],
-        expected: '26.04.2022, 21:06',
-      },
-      {
-        params: [new Date('2022-04-26T21:06:06+05:00')],
-        expected: '26.04.2022, 19:06',
-      },
-      {
-        params: [new Date('2022-04-26T21:06:06+05:00'), 'Europe/Ulyanovsk'],
-        expected: '26.04.2022, 20:06',
-      },
-    ];
-
-    test.each(dateTimeCases)('Convert to Moscow timezone', payload => {
-      const { params, expected } = payload;
-
-      expect(dateTime(...params)).toBe(expected);
-    });
-
-    test('Convert to local timezone', () => {
-      expect(dateTime(new Date('2022-04-26T21:06:06+05:00'), '')).toBeDefined();
-    });
-  });
-
   describe('Check dateToDateLong', () => {
     const dateToDateLongCases = [
       {
@@ -757,6 +723,45 @@ describe('helpers', () => {
     });
   });
 
+  describe('Check dateTime', () => {
+    const dateTimeCases = [
+      {
+        params: [undefined],
+        expected: '',
+      },
+      {
+        params: [null],
+        expected: '',
+      },
+      {
+        params: [''],
+        expected: '',
+      },
+      {
+        params: [new Date('2022-04-26T21:06:06.405296+03:00')],
+        expected: '26.04.2022, 21:06',
+      },
+      {
+        params: [new Date('2022-04-26T21:06:06+05:00')],
+        expected: '26.04.2022, 19:06',
+      },
+      {
+        params: [new Date('2022-04-26T21:06:06+05:00'), 'Europe/Ulyanovsk'],
+        expected: '26.04.2022, 20:06',
+      },
+    ];
+
+    test.each(dateTimeCases)('Convert to Moscow timezone', payload => {
+      const { params, expected } = payload;
+
+      expect(dateTime(...params)).toBe(expected);
+    });
+
+    test('Convert to local timezone', () => {
+      expect(dateTime(new Date('2022-04-26T21:06:06+05:00'), '')).toBeDefined();
+    });
+  });
+
   describe('Check dateToHoursMinutes', () => {
     const dateToHoursMinutesCases = [
       {
@@ -800,37 +805,37 @@ describe('helpers', () => {
     {
       minutes: null,
       time: '00:00',
-      byParts: '0 минут',
+      byParts: '0 мин',
     },
     {
       minutes: -60,
       time: '-01:00',
-      byParts: '-1 час',
+      byParts: '-1 ч',
     },
     {
       minutes: 0,
       time: '00:00',
-      byParts: '0 минут',
+      byParts: '0 мин',
     },
     {
       minutes: 15,
       time: '00:15',
-      byParts: '15 минут',
+      byParts: '15 мин',
     },
     {
       minutes: 120,
       time: '02:00',
-      byParts: '2 часа',
+      byParts: '2 ч',
     },
     {
       minutes: 145,
       time: '02:25',
-      byParts: '2 ч. 25 мин.',
+      byParts: '2 ч 25 мин',
     },
     {
       minutes: 42,
       time: '00:42',
-      byParts: '42 минуты',
+      byParts: '42 мин',
     },
   ];
 
@@ -839,6 +844,50 @@ describe('helpers', () => {
 
     expect(minutesToHoursMinutes(minutes)).toBe(time);
     expect(minutesToHoursMinutes(minutes, true)).toBe(byParts);
+  });
+
+  const parseTimeCases = [
+    {
+      time: '00:00',
+      expected: {
+        hours: 0,
+        minutes: 0,
+      },
+    },
+    {
+      time: '-01:00',
+      expected: {
+        hours: 0,
+        minutes: 0,
+      },
+    },
+    {
+      time: '02:00',
+      expected: {
+        hours: 2,
+        minutes: 0,
+      },
+    },
+    {
+      time: '00:15',
+      expected: {
+        hours: 0,
+        minutes: 15,
+      },
+    },
+    {
+      time: '02:25',
+      expected: {
+        hours: 2,
+        minutes: 25,
+      },
+    },
+  ];
+
+  test.each(parseTimeCases)('parseTime', payload => {
+    const { time, expected } = payload;
+
+    expect(parseTime(time)).toEqual(expected);
   });
 
   describe('Check weekOfYear', () => {
@@ -1260,15 +1309,68 @@ describe('helpers', () => {
         },
       ],
     },
+    {
+      mask: '99:99',
+      values: [null, '', '1', '12', '123', '1234', '12345', '12-34', '123-456'],
+      expected: [
+        {
+          clearValue: '',
+          formatValue: '',
+          valid: false,
+        },
+        {
+          clearValue: '',
+          formatValue: '',
+          valid: false,
+        },
+        {
+          clearValue: '1',
+          formatValue: '1',
+          valid: false,
+        },
+        {
+          clearValue: '12',
+          formatValue: '12',
+          valid: false,
+        },
+        {
+          clearValue: '123',
+          formatValue: '12:3',
+          valid: false,
+        },
+        {
+          clearValue: '1234',
+          formatValue: '12:34',
+          valid: true,
+        },
+        {
+          clearValue: '12345',
+          formatValue: '12:34',
+          valid: true,
+        },
+        {
+          clearValue: '1234',
+          formatValue: '12:34',
+          valid: true,
+        },
+        {
+          clearValue: '123456',
+          formatValue: '12:34',
+          valid: true,
+        },
+      ],
+    },
   ];
 
   test.each(maskCases)('maskIt', payload => {
     const { mask, values, expected } = payload;
 
     values.forEach((value, index) => {
-      expect(maskIt.clear(value)).toBe(expected[index].clearValue);
-      expect(maskIt.format(mask, value)).toBe(expected[index].formatValue);
-      expect(maskIt.check(mask, value)).toBe(expected[index].valid);
+      const { clearValue, formatValue, valid } = expected.at(index);
+
+      expect(maskIt.clear(value)).toBe(clearValue);
+      expect(maskIt.format(mask, value)).toBe(formatValue);
+      expect(maskIt.check(mask, value)).toBe(valid);
     });
   });
 

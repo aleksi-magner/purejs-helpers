@@ -139,14 +139,6 @@ import { ISOToDateFormat } from 'purejs-helpers';
 ISOToDateFormat('1979-12-03'); // '03.12.1979'
 ```
 
-### Преобразование даты в формат DD.MM.YYYY, HH:MM
-
-```javascript
-import { dateTime } from 'purejs-helpers';
-
-dateTime(new Date(2020, 9, 21, 8, 45)); // '21.10.2020, 08:45'
-```
-
 ### Преобразование даты в формат WW, DD MMMM YYYY
 
 ```javascript
@@ -177,6 +169,14 @@ dateToDateLong({
 });
 ```
 
+### Преобразование даты в формат DD.MM.YYYY, HH:MM
+
+```javascript
+import { dateTime } from 'purejs-helpers';
+
+dateTime(new Date(2020, 9, 21, 8, 45)); // '21.10.2020, 08:45'
+```
+
 ### Преобразование даты в формат HH:MM
 
 ```javascript
@@ -192,6 +192,15 @@ import { minutesToHoursMinutes } from 'purejs-helpers';
 
 minutesToHoursMinutes(480); // '08:00'
 minutesToHoursMinutes(-480); // '-08:00'
+minutesToHoursMinutes(495, true); // '8 ч 15 мин'
+```
+
+### Разделение времени в формате HH:MM на часы и минуты
+
+```javascript
+import { parseTime } from 'purejs-helpers';
+
+parseTime('02:25'); // { hours: 2, minutes: 25 }
 ```
 
 ### Получение номера недели в году
@@ -243,7 +252,7 @@ bytesToSize(40031); // '39.09 кБ'
 ```javascript
 import { convertFileToBase64 } from 'purejs-helpers';
 
-convertFileToBase64(<File>); // '<Base64>'
+convertFileToBase64(`<File>`); // <Base64>
 ```
 
 ### Удаление ключей из объекта с клонированием
