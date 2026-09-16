@@ -856,39 +856,6 @@ export const deepClone = (sourceObject: any): any => {
   return clone;
 };
 
-type MemoHandler = {
-  cache: Map<string, Function>;
-  apply: (fn: Function, context: any, args: any[]) => any;
-};
-
-/**
- * Мемоизация
- * @param {Function} callback - Функция обратного вызова
- * @return {Function}
- *
- * @example
- * const add = (x, y) => x + y;
- * const memoAdd = memo(add);
- *
- * memoAdd(24, 42); // Calculated
- * memoAdd(42, 24); // From cache
- */
-export const memo = (callback: Function): Function =>
-  new Proxy(callback, <MemoHandler>{
-    cache: new Map(),
-    apply(fn: Function, context: any, args: any[]) {
-      args.sort((a, b) => (a > b ? 1 : -1));
-
-      const key: string = args.toString();
-
-      if (!this.cache.has(key)) {
-        this.cache.set(key, fn.apply(context, args));
-      }
-
-      return this.cache.get(key);
-    },
-  });
-
 /**
  * Нечёткий поиск в строке по поисковой фразе.
  * @param {string} query - поисковая фраза.

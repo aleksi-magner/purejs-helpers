@@ -303,18 +303,6 @@ const arr = [{ id: 1, text: 42 }, 'string'];
 deepClone(arr);
 ```
 
-### Мемоизация
-
-```javascript
-import { memo } from 'purejs-helpers';
-
-const add = (x, y) => x + y;
-const memoAdd = memo(add);
-
-memoAdd(24, 42); // Calculated
-memoAdd(42, 24); // From cache
-```
-
 ### Нечёткий поиск в строке по поисковой фразе
 
 ```javascript

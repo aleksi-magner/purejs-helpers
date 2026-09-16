@@ -1572,14 +1572,6 @@ describe('helpers', () => {
     });
   });
 
-  test('memo', () => {
-    const add = (x, y) => x + y;
-    const memoAdd = memo(add);
-
-    expect(memoAdd(24, 42)).toBe(66);
-    expect(memoAdd(42, 24)).toBe(66);
-  });
-
   const fuzzySearchCases = [
     {
       query: 'wheelcart',
