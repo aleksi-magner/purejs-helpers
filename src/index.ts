@@ -3,6 +3,11 @@
  */
 export const MILLISECONDS_IN_DAY = 86_400_000; // 24 * 60 * 60 * 1000
 
+/**
+ * Часовой пояс Москвы
+ */
+export const moscowTimeZone = 'Europe/Moscow';
+
 export type Environment = {
   server: string;
   isLocal: boolean;
@@ -323,12 +328,14 @@ export const isValidDate = (date?: Date): boolean => {
 /**
  * Преобразование даты в ISO формат
  * @param {Date} date - Дата
+ * @param {string} [timeZone] - Часовой пояс
  * @return {string}
  *
  * @example
- * toISODate(new Date('2020-10-21T08:45:00')); // '2020-10-21'
+ * toISODate(new Date('2022-04-26T02:06:06+05:00'), 'Europe/Lisbon'); // '2022-04-25'
+ * toISODate(new Date('2022-04-26T02:06:06+05:00'), moscowTimeZone); // '2022-04-26'
  */
-export const toISODate = (date: Date): string => {
+export const toISODate = (date: Date, timeZone?: string): string => {
   if (!isValidDate(date)) {
     return '';
   }
@@ -339,19 +346,23 @@ export const toISODate = (date: Date): string => {
     day: '2-digit',
   };
 
+  if (timeZone) {
+    options.timeZone = timeZone;
+  }
+
   return new Intl.DateTimeFormat('ru-RU', options).format(date).split('.').reverse().join('-');
 };
 
 /**
  * Преобразование даты в формат DD.MM.YYYY
  * @param {Date} date - Дата
- * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @param {string} [timeZone] - Часовой пояс
  * @return {string}
  *
  * @example
  * dateToDateShort(new Date('2020-10-21T08:45:00')); // '21.10.2020'
  */
-export const dateToDateShort = (date: Date, timeZone: string = 'Europe/Moscow'): string => {
+export const dateToDateShort = (date: Date, timeZone?: string): string => {
   if (!isValidDate(date)) {
     return '';
   }
@@ -431,16 +442,20 @@ export type DateToDateLong = {
  *   date: new Date(2020, 9, 21),
  *   showYear: false,
  * });
+ *
+ * // '26 апреля 2022'
+ * dateToDateLong({
+ *  date: new Date(2022, 3, 27),
+ *  timeZone: 'Europe/Lisbon',
+ * });
  */
 export const dateToDateLong = (payload: DateToDateLong = {}): string => {
   if (!isValidDate(payload.date)) {
     return '';
   }
 
-  const { date } = payload;
   const showWeekDay: boolean = payload.showWeekDay ?? false;
   const showYear: boolean = payload.showYear ?? true;
-  const timeZone: string = payload.timeZone ?? 'Europe/Moscow';
 
   const options: Intl.DateTimeFormatOptions = {
     day: 'numeric',
@@ -455,11 +470,11 @@ export const dateToDateLong = (payload: DateToDateLong = {}): string => {
     options.year = 'numeric';
   }
 
-  if (timeZone) {
-    options.timeZone = timeZone;
+  if (payload.timeZone) {
+    options.timeZone = payload.timeZone;
   }
 
-  const longDate: string = new Intl.DateTimeFormat('ru-RU', options).format(<Date>date);
+  const longDate: string = new Intl.DateTimeFormat('ru-RU', options).format(payload.date);
 
   return showYear ? longDate.slice(0, -3) : longDate;
 };
@@ -467,13 +482,14 @@ export const dateToDateLong = (payload: DateToDateLong = {}): string => {
 /**
  * Преобразование даты в формат DD.MM.YYYY, HH:MM
  * @param {Date} date - Дата
- * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @param {string} [timeZone] - Часовой пояс
  * @return {string}
  *
  * @example
  * dateTime(new Date('2020-10-21T08:45:00')); // '21.10.2020, 08:45'
+ * dateTime(new Date('2020-10-21T08:45:00'), 'Europe/Lisbon'); // '21.10.2020, 08:45'
  */
-export const dateTime = (date: Date, timeZone: string = 'Europe/Moscow'): string => {
+export const dateTime = (date: Date, timeZone?: string): string => {
   if (!isValidDate(date)) {
     return '';
   }
@@ -483,7 +499,7 @@ export const dateTime = (date: Date, timeZone: string = 'Europe/Moscow'): string
     month: '2-digit',
     year: 'numeric',
     hour12: false,
-    hour: 'numeric',
+    hour: '2-digit',
     minute: '2-digit',
   };
 
@@ -497,13 +513,13 @@ export const dateTime = (date: Date, timeZone: string = 'Europe/Moscow'): string
 /**
  * Преобразование даты в формат HH:MM
  * @param {Date} date - Дата
- * @param {string} [timeZone='Europe/Moscow'] - Часовой пояс
+ * @param {string} [timeZone] - Часовой пояс
  * @return {string}
  *
  * @example
  * dateToHoursMinutes(new Date('2020-10-21')); // '08:45'
  */
-export const dateToHoursMinutes = (date: Date, timeZone: string = 'Europe/Moscow'): string => {
+export const dateToHoursMinutes = (date: Date, timeZone?: string): string => {
   if (!isValidDate(date)) {
     return '00:00';
   }

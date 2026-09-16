@@ -2,6 +2,7 @@ import { vi, describe, test, expect } from 'vitest';
 
 import {
   MILLISECONDS_IN_DAY,
+  moscowTimeZone,
   getEnvironment,
   cookie,
   getType,
@@ -33,6 +34,10 @@ import {
 describe('helpers', () => {
   test('MILLISECONDS_IN_DAY', () => {
     expect(MILLISECONDS_IN_DAY).toBe(86400000);
+  });
+
+  test('moscowTimeZone', () => {
+    expect(moscowTimeZone).toBe('Europe/Moscow');
   });
 
   const envCases = [
@@ -109,17 +114,6 @@ describe('helpers', () => {
 
     window.location.assign('about:blank');
   });
-
-  const kzCases = [
-    {
-      url: 'https://server.somename.ru/',
-      expected: false,
-    },
-    {
-      url: 'https://server.somename.kz/',
-      expected: true,
-    },
-  ];
 
   test('cookie', () => {
     window.location.assign('http://localhost:8080/');
@@ -517,64 +511,140 @@ describe('helpers', () => {
   const toISODateCases = [
     {
       date: undefined,
+      timeZone: '',
       expected: '',
     },
     {
       date: null,
+      timeZone: '',
       expected: '',
     },
     {
       date: new Date('2022-32-33'),
+      timeZone: '',
       expected: '',
     },
     {
       date: new Date('2022-04-26T21:06:06.405296+03:00'),
+      timeZone: 'Europe/Lisbon',
+      expected: '2022-04-26',
+    },
+    {
+      date: new Date('2022-04-26T21:06:06.405296+03:00'),
+      timeZone: 'Europe/Moscow',
       expected: '2022-04-26',
     },
     {
       date: new Date('2022-04-26T21:06:06+05:00'),
+      timeZone: 'Europe/Lisbon',
       expected: '2022-04-26',
+    },
+    {
+      date: new Date('2022-04-26T21:06:06+05:00'),
+      timeZone: 'Europe/Moscow',
+      expected: '2022-04-26',
+    },
+    {
+      date: new Date('2022-04-26T23:06:06+01:00'),
+      timeZone: 'Europe/Lisbon',
+      expected: '2022-04-26',
+    },
+    {
+      date: new Date('2022-04-26T23:06:06+01:00'),
+      timeZone: 'Europe/Moscow',
+      expected: '2022-04-27',
+    },
+    {
+      date: new Date('2022-04-26T02:06:06+05:00'),
+      timeZone: 'Europe/Lisbon',
+      expected: '2022-04-25',
+    },
+    {
+      date: new Date('2022-04-26T02:06:06+05:00'),
+      timeZone: 'Europe/Moscow',
+      expected: '2022-04-26',
+    },
+    {
+      date: new Date('2022-04-26T19:06:06-03:00'),
+      timeZone: 'Europe/Lisbon',
+      expected: '2022-04-26',
+    },
+    {
+      date: new Date('2022-04-26T19:06:06-03:00'),
+      timeZone: 'Europe/Moscow',
+      expected: '2022-04-27',
+    },
+    {
+      date: new Date(2022, 3, 27),
+      timeZone: '',
+      expected: '2022-04-27',
     },
   ];
 
   test.each(toISODateCases)('toISODate', payload => {
-    const { date, expected } = payload;
+    const { date, timeZone, expected } = payload;
 
-    expect(toISODate(date)).toBe(expected);
+    expect(toISODate(date, timeZone)).toBe(expected);
   });
 
   describe('Check dateToDateShort', () => {
     const dateToDateShortCases = [
       {
-        params: [undefined],
+        date: undefined,
+        timeZone: '',
         expected: '',
       },
       {
-        params: [null],
+        date: null,
+        timeZone: '',
         expected: '',
       },
       {
-        params: [new Date('2022-32-33')],
+        date: new Date('2022-32-33'),
+        timeZone: '',
         expected: '',
       },
       {
-        params: [new Date('2022-04-26T21:06:06.405296+03:00')],
+        date: new Date('2022-04-26T21:06:06.405296+03:00'),
+        timeZone: 'Europe/Moscow',
         expected: '26.04.2022',
       },
       {
-        params: [new Date('2022-04-26T21:06:06+05:00')],
+        date: new Date('2022-04-26T21:06:06+05:00'),
+        timeZone: 'Europe/Moscow',
         expected: '26.04.2022',
       },
       {
-        params: [new Date('2022-04-26T21:06:06+05:00'), 'Europe/Ulyanovsk'],
+        date: new Date('2022-04-26T21:06:06+05:00'),
+        timeZone: 'Europe/Ulyanovsk',
         expected: '26.04.2022',
+      },
+      {
+        date: new Date('2022-04-26T02:06:06+05:00'),
+        timeZone: 'Europe/Lisbon',
+        expected: '25.04.2022',
+      },
+      {
+        date: new Date('2022-04-26T19:06:06-03:00'),
+        timeZone: 'Europe/Lisbon',
+        expected: '26.04.2022',
+      },
+      {
+        date: new Date('2022-04-26T19:06:06-03:00'),
+        timeZone: 'Europe/Moscow',
+        expected: '27.04.2022',
+      },
+      {
+        date: new Date(2022, 3, 27),
+        timeZone: '',
+        expected: '27.04.2022',
       },
     ];
 
     test.each(dateToDateShortCases)('Convert to Moscow timezone', payload => {
-      const { params, expected } = payload;
+      const { date, timeZone, expected } = payload;
 
-      expect(dateToDateShort(...params)).toBe(expected);
+      expect(dateToDateShort(date, timeZone)).toBe(expected);
     });
 
     test('Convert to local timezone', () => {
@@ -623,182 +693,215 @@ describe('helpers', () => {
     expect(ISOToDateFormat(param)).toBe(expected);
   });
 
-  describe('Check dateToDateLong', () => {
-    const dateToDateLongCases = [
-      {
-        param: {
-          date: new Date('2022-04-26T21:06:06+05:00'),
-        },
-        expected: '26 апреля 2022',
+  const dateToDateLongCases = [
+    {
+      param: {},
+      expected: '',
+    },
+    {
+      param: {
+        showWeekDay: false,
+        showYear: true,
+        timeZone: '',
       },
-      {
-        param: {
-          date: new Date('2022-04-27T01:06:06+05:00'),
-        },
-        expected: '26 апреля 2022',
+      expected: '',
+    },
+    {
+      param: {
+        date: null,
+        showWeekDay: false,
+        showYear: true,
+        timeZone: '',
       },
-      {
-        param: {
-          date: new Date('2022-04-27T01:06:06+05:00'),
-          showWeekDay: false,
-          showYear: true,
-          timeZone: 'Europe/Ulyanovsk',
-        },
-        expected: '27 апреля 2022',
+      expected: '',
+    },
+    {
+      param: {
+        date: new Date('2022-32-33'),
+        showWeekDay: false,
+        showYear: true,
+        timeZone: '',
       },
-      {
-        param: {
-          date: new Date('2022-04-27T01:06:06+05:00'),
-          showWeekDay: false,
-          showYear: false,
-          timeZone: 'Europe/Ulyanovsk',
-        },
-        expected: '27 апреля',
+      expected: '',
+    },
+    {
+      param: {
+        date: new Date('2022-04-26T21:06:06+05:00'),
+        timeZone: moscowTimeZone,
       },
-      {
-        param: {
-          date: new Date('2022-04-26T21:06:06.405296+03:00'),
-          showWeekDay: true,
-          showYear: true,
-          timeZone: 'Europe/Ulyanovsk',
-        },
-        expected: 'вт, 26 апреля 2022',
+      expected: '26 апреля 2022',
+    },
+    {
+      param: {
+        date: new Date('2022-04-27T01:06:06+05:00'),
+        timeZone: moscowTimeZone,
       },
-      {
-        param: {
-          date: new Date('2022-04-26'),
-          showWeekDay: true,
-          showYear: false,
-          timeZone: 'Europe/Ulyanovsk',
-        },
-        expected: 'вт, 26 апреля',
+      expected: '26 апреля 2022',
+    },
+    {
+      param: {
+        date: new Date('2022-04-27T01:06:06+05:00'),
+        showWeekDay: false,
+        showYear: true,
+        timeZone: 'Europe/Ulyanovsk',
       },
-      {
-        param: {
-          date: new Date('2022-32-33'),
-          showWeekDay: false,
-          showYear: true,
-          timeZone: '',
-        },
-        expected: '',
+      expected: '27 апреля 2022',
+    },
+    {
+      param: {
+        date: new Date('2022-04-27T01:06:06+05:00'),
+        showWeekDay: false,
+        showYear: false,
+        timeZone: 'Europe/Ulyanovsk',
       },
-      {
-        param: {
-          date: null,
-          showWeekDay: false,
-          showYear: true,
-          timeZone: '',
-        },
-        expected: '',
+      expected: '27 апреля',
+    },
+    {
+      param: {
+        date: new Date('2022-04-26T21:06:06.405296+03:00'),
+        showWeekDay: true,
+        showYear: true,
+        timeZone: 'Europe/Ulyanovsk',
       },
-      {
-        param: {
-          showWeekDay: false,
-          showYear: true,
-          timeZone: '',
-        },
-        expected: '',
+      expected: 'вт, 26 апреля 2022',
+    },
+    {
+      param: {
+        date: new Date('2022-04-26'),
+        showWeekDay: true,
+        showYear: false,
+        timeZone: 'Europe/Ulyanovsk',
       },
-      {
-        param: {},
-        expected: '',
+      expected: 'вт, 26 апреля',
+    },
+    {
+      param: {
+        date: new Date(2022, 3, 27),
+        timeZone: 'Europe/Lisbon',
       },
-    ];
+      expected: '26 апреля 2022',
+    },
+    {
+      param: {
+        date: new Date(2022, 3, 27),
+        timeZone: '',
+      },
+      expected: '27 апреля 2022',
+    },
+  ];
 
-    test.each(dateToDateLongCases)('Convert to Moscow timezone', payload => {
-      const { param, expected } = payload;
+  test.each(dateToDateLongCases)('dateToDateLong', payload => {
+    const { param, expected } = payload;
 
-      expect(dateToDateLong(param)).toBe(expected);
-    });
-
-    test('Convert to local timezone', () => {
-      expect(
-        dateToDateLong({
-          date: new Date('2022-04-26'),
-          showWeekDay: false,
-          showYear: true,
-          timeZone: '',
-        }),
-      ).toBeDefined();
-    });
+    expect(dateToDateLong(param)).toBe(expected);
   });
 
-  describe('Check dateTime', () => {
-    const dateTimeCases = [
-      {
-        params: [undefined],
-        expected: '',
-      },
-      {
-        params: [null],
-        expected: '',
-      },
-      {
-        params: [''],
-        expected: '',
-      },
-      {
-        params: [new Date('2022-04-26T21:06:06.405296+03:00')],
-        expected: '26.04.2022, 21:06',
-      },
-      {
-        params: [new Date('2022-04-26T21:06:06+05:00')],
-        expected: '26.04.2022, 19:06',
-      },
-      {
-        params: [new Date('2022-04-26T21:06:06+05:00'), 'Europe/Ulyanovsk'],
-        expected: '26.04.2022, 20:06',
-      },
-    ];
+  const dateTimeCases = [
+    {
+      date: undefined,
+      timeZone: '',
+      expected: '',
+    },
+    {
+      date: null,
+      timeZone: '',
+      expected: '',
+    },
+    {
+      date: '',
+      timeZone: '',
+      expected: '',
+    },
+    {
+      date: new Date('2022-32-33'),
+      timeZone: '',
+      expected: '',
+    },
+    {
+      date: new Date('2022-04-26T21:06:06.405296+03:00'),
+      timeZone: moscowTimeZone,
+      expected: '26.04.2022, 21:06',
+    },
+    {
+      date: new Date('2022-04-26T21:06:06+05:00'),
+      timeZone: moscowTimeZone,
+      expected: '26.04.2022, 19:06',
+    },
+    {
+      date: new Date('2022-04-26T21:06:06+05:00'),
+      timeZone: 'Europe/Ulyanovsk',
+      expected: '26.04.2022, 20:06',
+    },
+    {
+      date: new Date('2022-04-26T08:06:06+03:00'),
+      timeZone: moscowTimeZone,
+      expected: '26.04.2022, 08:06',
+    },
+    {
+      date: new Date(2022, 3, 27),
+      timeZone: '',
+      expected: '27.04.2022, 00:00',
+    },
+  ];
 
-    test.each(dateTimeCases)('Convert to Moscow timezone', payload => {
-      const { params, expected } = payload;
+  test.each(dateTimeCases)('dateTime', payload => {
+    const { date, timeZone, expected } = payload;
 
-      expect(dateTime(...params)).toBe(expected);
-    });
-
-    test('Convert to local timezone', () => {
-      expect(dateTime(new Date('2022-04-26T21:06:06+05:00'), '')).toBeDefined();
-    });
+    expect(dateTime(date, timeZone)).toBe(expected);
   });
 
-  describe('Check dateToHoursMinutes', () => {
-    const dateToHoursMinutesCases = [
-      {
-        params: [undefined],
-        expected: '00:00',
-      },
-      {
-        params: [null],
-        expected: '00:00',
-      },
-      {
-        params: [new Date('2022-32-33')],
-        expected: '00:00',
-      },
-      {
-        params: [new Date('2022-04-26T21:06:06.405296+03:00')],
-        expected: '21:06',
-      },
-      {
-        params: [new Date('2022-04-26T21:06:06+05:00')],
-        expected: '19:06',
-      },
-      {
-        params: [new Date('2022-04-26T21:06:06+05:00'), 'Europe/Ulyanovsk'],
-        expected: '20:06',
-      },
-    ];
+  const dateToHoursMinutesCases = [
+    {
+      date: undefined,
+      timeZone: '',
+      expected: '00:00',
+    },
+    {
+      date: null,
+      timeZone: '',
+      expected: '00:00',
+    },
+    {
+      date: '',
+      timeZone: '',
+      expected: '00:00',
+    },
+    {
+      date: new Date('2022-32-33'),
+      timeZone: '',
+      expected: '00:00',
+    },
+    {
+      date: new Date('2022-04-26T21:06:06.405296+03:00'),
+      timeZone: moscowTimeZone,
+      expected: '21:06',
+    },
+    {
+      date: new Date('2022-04-26T21:06:06+05:00'),
+      timeZone: moscowTimeZone,
+      expected: '19:06',
+    },
+    {
+      date: new Date('2022-04-26T21:06:06+05:00'),
+      timeZone: 'Europe/Ulyanovsk',
+      expected: '20:06',
+    },
+    {
+      date: new Date(2022, 3, 27),
+      timeZone: '',
+      expected: '00:00',
+    },
+    {
+      date: new Date(2022, 3, 27, 8, 46),
+      timeZone: '',
+      expected: '08:46',
+    },
+  ];
 
-    test.each(dateToHoursMinutesCases)('Convert to Moscow timezone', payload => {
-      const { params, expected } = payload;
+  test.each(dateToHoursMinutesCases)('dateToHoursMinutes', payload => {
+    const { date, timeZone, expected } = payload;
 
-      expect(dateToHoursMinutes(...params)).toBe(expected);
-    });
-
-    test('Convert to local timezone', () => {
-      expect(dateToHoursMinutes(new Date('2022-04-26T21:06:06+05:00'), '')).not.toBe('00:00');
-    });
+    expect(dateToHoursMinutes(date, timeZone)).toBe(expected);
   });
 
   const minutesToHoursMinutesCases = [

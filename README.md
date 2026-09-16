@@ -14,6 +14,18 @@ yarn add purejs-helpers
 
 ## Использование
 
+### Константы
+
+```javascript
+import { MILLISECONDS_IN_DAY, moscowTimeZone } from 'purejs-helpers';
+
+// Количество миллисекунд в сутках
+MILLISECONDS_IN_DAY; // 86_400_000
+
+// Часовой пояс Москвы
+moscowTimeZone; // 'Europe/Moscow'
+```
+
 ### Определение окружения по домену
 
 ```javascript
@@ -118,16 +130,20 @@ isValidDate(new Date('2023-03-16')); // true
 ### Преобразование даты в ISO формат
 
 ```javascript
-import { toISODate } from 'purejs-helpers';
+import { moscowTimeZone, toISODate } from 'purejs-helpers';
 
+toISODate(new Date('2022-04-26T02:06:06+05:00'), 'Europe/Lisbon'); // '2022-04-25'
+toISODate(new Date('2022-04-26T02:06:06+05:00'), moscowTimeZone); // '2022-04-26'
 toISODate(new Date(2020, 9, 21)); // '2020-10-21'
 ```
 
 ### Преобразование даты в формат DD.MM.YYYY
 
 ```javascript
-import { dateToDateShort } from 'purejs-helpers';
+import { moscowTimeZone, dateToDateShort } from 'purejs-helpers';
 
+dateToDateShort(new Date('2022-04-26T02:06:06+05:00'), 'Europe/Lisbon'); // '25.04.2022'
+dateToDateShort(new Date('2022-04-26T02:06:06+05:00'), moscowTimeZone); // '26.04.2022'
 dateToDateShort(new Date(2020, 9, 21)); // '21.10.2020'
 ```
 
@@ -142,11 +158,12 @@ ISOToDateFormat('1979-12-03'); // '03.12.1979'
 ### Преобразование даты в формат WW, DD MMMM YYYY
 
 ```javascript
-import { dateToDateLong } from 'purejs-helpers';
+import { moscowTimeZone, dateToDateLong } from 'purejs-helpers';
 
 // '21 октября 2020'
 dateToDateLong({
   date: new Date(2020, 9, 21),
+  timeZone: moscowTimeZone,
 });
 
 // 'ср, 21 октября 2020'
@@ -167,21 +184,31 @@ dateToDateLong({
   date: new Date(2020, 9, 21),
   showYear: false,
 });
+
+// '26 апреля 2022'
+dateToDateLong({
+  date: new Date(2022, 3, 27),
+  timeZone: 'Europe/Lisbon',
+});
 ```
 
 ### Преобразование даты в формат DD.MM.YYYY, HH:MM
 
 ```javascript
-import { dateTime } from 'purejs-helpers';
+import { moscowTimeZone, dateTime } from 'purejs-helpers';
 
+dateTime(new Date('2022-04-26T02:06:06+05:00'), 'Europe/Lisbon'); // '25.04.2022, 22:06'
+dateTime(new Date('2022-04-26T02:06:06+05:00'), moscowTimeZone); // '26.04.2022, 00:06'
 dateTime(new Date(2020, 9, 21, 8, 45)); // '21.10.2020, 08:45'
 ```
 
 ### Преобразование даты в формат HH:MM
 
 ```javascript
-import { dateToHoursMinutes } from 'purejs-helpers';
+import { moscowTimeZone, dateToHoursMinutes } from 'purejs-helpers';
 
+dateToHoursMinutes(new Date('2022-04-26T02:06:06+05:00'), 'Europe/Lisbon'); // '22:06'
+dateToHoursMinutes(new Date('2022-04-26T02:06:06+05:00'), moscowTimeZone); // '00:06'
 dateToHoursMinutes(new Date(2020, 9, 21, 8, 45)); // '08:45'
 ```
 
