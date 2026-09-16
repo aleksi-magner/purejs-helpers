@@ -810,30 +810,6 @@ export const maskIt: Readonly<MaskMethods> = Object.freeze({
 });
 
 /**
- * Преобразование файла в Base64
- * @param {File} file - Файл
- * @return {Promise<string>}
- */
-export const convertFileToBase64 = (file: File): Promise<string> => {
-  if (!file) {
-    return Promise.resolve('');
-  }
-
-  const reader: FileReader = new FileReader();
-
-  return new Promise(resolve => {
-    reader.onload = (): void => {
-      // Всегда строка при использовании readAsDataURL()
-      const base64: string = reader.result as string;
-
-      resolve(<string>base64.split('base64,', 2).at(1));
-    };
-
-    reader.readAsDataURL(file);
-  });
-};
-
-/**
  * Удаление ключей из объекта
  * @param {string[]} exclusionFields - Список исключаемых полей
  * @param {Object} [sourceObject={}] - Исходный объект

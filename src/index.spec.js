@@ -23,7 +23,6 @@ import {
   weekOfYear,
   weekNumberToDate,
   maskIt,
-  convertFileToBase64,
   removeObjectKeys,
   deepClone,
   memo,
@@ -1475,19 +1474,6 @@ describe('helpers', () => {
       expect(maskIt.format(mask, value)).toBe(formatValue);
       expect(maskIt.check(mask, value)).toBe(valid);
     });
-  });
-
-  test('convertFileToBase64', async () => {
-    const validFileContent = '<tag1>Test file<tag1>';
-    const validFile = new File([validFileContent], 'File.xml', { type: 'text/xml' });
-
-    const validFileInBase64 = await convertFileToBase64(validFile);
-
-    expect(validFileInBase64).toBe('PHRhZzE+VGVzdCBmaWxlPHRhZzE+');
-
-    const emptyFile = await convertFileToBase64(null);
-
-    expect(emptyFile).toBe('');
   });
 
   const removeObjectKeysCases = [

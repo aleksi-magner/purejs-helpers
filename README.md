@@ -274,14 +274,6 @@ import { bytesToSize } from 'purejs-helpers';
 bytesToSize(40031); // '39.09 кБ'
 ```
 
-### Преобразование файла в Base64
-
-```javascript
-import { convertFileToBase64 } from 'purejs-helpers';
-
-convertFileToBase64(`<File>`); // <Base64>
-```
-
 ### Удаление ключей из объекта с клонированием
 
 ```javascript
