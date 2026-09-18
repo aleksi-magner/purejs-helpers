@@ -356,11 +356,27 @@ describe('helpers', () => {
       expected: '00',
     },
     {
+      param: 0,
+      expected: '00',
+    },
+    {
+      param: '0',
+      expected: '00',
+    },
+    {
       param: 9,
       expected: '09',
     },
     {
+      param: '9',
+      expected: '09',
+    },
+    {
       param: 42,
+      expected: '42',
+    },
+    {
+      param: '42',
       expected: '42',
     },
   ];
